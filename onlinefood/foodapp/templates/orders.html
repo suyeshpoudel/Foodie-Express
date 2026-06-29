@@ -9,99 +9,10 @@
     </div>
 </div>
 
-<div class="container">
+<div class="container" id="orders-container">
     {% if orders %}
     {% for order in orders %}
-    <div class="card-food mb-4 overflow-hidden">
-        <div class="p-4">
-            <div class="d-flex flex-wrap justify-content-between align-items-start mb-3">
-                <div>
-                    <h5 class="fw-bold mb-1">
-                        Order #{{ order.uid|truncatechars:8 }}
-                        <span class="badge bg-{% if order.status == 'Delivered' %}success{% elif order.status == 'Cancel' %}danger{% elif order.status == 'Accepted' %}info{% elif order.status == 'Packed' %}warning text-dark{% elif order.status == 'On the way' %}primary{% else %}secondary{% endif %} ms-2 fs-6">
-                            {{ order.status }}
-                        </span>
-                    </h5>
-                    <small class="text-muted">
-                        <i class="fas fa-calendar-alt me-1"></i> {{ order.created_at|date:"F d, Y" }} at {{ order.created_at|time:"h:i A" }}
-                    </small>
-                </div>
-                <div class="text-end">
-                    <div class="fw-bold fs-5" style="color: var(--primary);">NPR {{ order.get_cart_total }}</div>
-                    <small class="text-muted">{{ order.cart_item.count }} item{{ order.cart_item.count|pluralize }}</small>
-                </div>
-            </div>
-
-            <!-- Progress Timeline -->
-            <div class="mt-4 mb-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    {% for step in status_flow %}
-                    {% with step_idx=forloop.counter0 %}
-                    {% with is_cancelled=order.status %}
-                    <div class="text-center" style="flex: 1; position: relative;">
-                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold"
-                             style="width: 36px; height: 36px; font-size: 0.8rem;
-                                    background: {% if is_cancelled == 'Cancel' %}#e6ddc5{% elif step_idx < order.status_index %}var(--success){% elif step_idx == order.status_index %}var(--primary){% else %}#e6ddc5{% endif %};
-                                    color: {% if step_idx < order.status_index or step_idx == order.status_index %}white{% else %}#ccc{% endif %};">
-                            {% if step_idx < order.status_index %}
-                            <i class="fas fa-check" style="font-size: 0.85rem;"></i>
-                            {% else %}
-                            {{ step_idx|add:"1" }}
-                            {% endif %}
-                        </div>
-                        <small class="d-block mt-1" style="font-size: 0.65rem; font-weight: 600;
-                                color: {% if step_idx < order.status_index or step_idx == order.status_index %}#333{% else %}#ccc{% endif %};">
-                            {{ step }}
-                        </small>
-                        {% if not forloop.last %}
-                        <div style="position: absolute; top: 18px; left: calc(50% + 18px); width: calc(100% - 36px); height: 3px;
-                                    background: {% if step_idx < order.status_index and is_cancelled != 'Cancel' %}var(--success){% else %}#e6ddc5{% endif %};">
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% endwith %}
-                    {% endwith %}
-                    {% endfor %}
-                </div>
-                {% if order.status == 'Cancel' %}
-                <div class="text-center mt-2">
-                    <span class="badge bg-danger">This order has been cancelled</span>
-                </div>
-                {% endif %}
-            </div>
-
-            {% if order.delivery_address %}
-            <div class="mb-3 p-3 rounded" style="background: #fafaf9; border: 1px solid #e6ddc5;">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
-                    <div>
-                        <span class="fw-semibold small">{{ order.delivery_address.full_name }}</span>
-                        <span class="text-muted small"> | {{ order.delivery_address.phone }}</span>
-                        <div class="small text-muted">{{ order.delivery_address.street }}, {{ order.delivery_address.city }}{% if order.delivery_address.zip_code %} - {{ order.delivery_address.zip_code }}{% endif %}</div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            <hr class="my-3">
-
-            <div class="row g-2">
-                {% for cart_item in order.cart_item.all %}
-                <div class="col-md-6">
-                    <div class="d-flex align-items-center gap-2 p-2 rounded" style="background: #fafaf9;">
-                        <img src="{% if cart_item.item.image %}{{ cart_item.item.image.url }}{% else %}https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=60&h=60&fit=crop{% endif %}"
-                             style="width: 45px; height: 45px; object-fit: cover; border-radius: 8px;">
-                        <div class="flex-grow-1">
-                            <div class="fw-semibold small">{{ cart_item.item.item_name }}</div>
-                            <small class="text-muted">{{ cart_item.quantity }}x @ NPR {{ cart_item.item.price }}</small>
-                        </div>
-                        <small class="fw-bold" style="color: var(--primary);">NPR {{ cart_item.total_cost }}</small>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
+    {% include '_order_card.html' %}
     {% endfor %}
     {% else %}
     <div class="empty-state">
@@ -115,47 +26,40 @@
 
 <script>
 (function() {
-    if (!('Notification' in window) || !('fetch' in window)) return;
+    if (!('Notification' in window)) return;
 
-    var statusMap = {};
-
-    function requestPermission() {
-        if (Notification.permission === 'default') {
-            Notification.requestPermission();
-        }
+    if (Notification.permission === 'default') {
+        Notification.requestPermission();
     }
 
-    function pollUpdates() {
-        fetch('/api/check-order-updates/')
-            .then(function(r) { return r.json(); })
-            .then(function(orders) {
-                orders.forEach(function(order) {
-                    var prev = statusMap[order.uid];
-                    if (prev && prev !== order.status && Notification.permission === 'granted') {
-                        var statusLabels = {
-                            'Accepted': 'Order Accepted', 'Packed': 'Order Packed',
-                            'On the way': 'Out for Delivery', 'Delivered': 'Delivered',
-                            'Cancel': 'Cancelled'
-                        };
-                        var label = statusLabels[order.status] || order.status;
-                        try {
-                            var n = new Notification('Foodie Express - Order #' + order.uid, {
-                                body: 'Your order is now: ' + label,
-                                icon: 'https://cdn-icons-png.flaticon.com/512/1046/1046857.png',
-                            });
-                            setTimeout(function() { n.close(); }, 6000);
-                        } catch(e) {}
-                    }
-                    statusMap[order.uid] = order.status;
-                });
-            })
-            .catch(function() {});
-    }
+    document.addEventListener('htmx:afterSwap', function(e) {
+        var target = e.detail.target;
+        var oldStatus = target ? target.getAttribute('data-status') : null;
+        var uid = target ? target.id?.replace('order-', '') : null;
+        if (!uid || !oldStatus) return;
 
-    requestPermission();
-    if (Notification.permission === 'granted' || Notification.permission === 'default') {
-        setInterval(pollUpdates, 20000);
-    }
+        var newCard = document.getElementById('order-' + uid);
+        if (!newCard) return;
+
+        var newStatus = newCard.getAttribute('data-status');
+        if (!newStatus || oldStatus === newStatus) return;
+
+        if (Notification.permission !== 'granted') return;
+
+        var labels = {
+            'Accepted': 'Order Accepted', 'Packed': 'Order Packed',
+            'On the way': 'Out for Delivery', 'Delivered': 'Delivered',
+            'Cancel': 'Cancelled'
+        };
+        var label = labels[newStatus] || newStatus;
+        try {
+            var n = new Notification('Foodie Express - Order #' + uid.slice(0, 8), {
+                body: 'Your order is now: ' + label,
+                icon: 'https://cdn-icons-png.flaticon.com/512/1046/1046857.png',
+            });
+            setTimeout(function() { n.close(); }, 6000);
+        } catch(e) {}
+    });
 })();
 </script>
 {% endblock %}

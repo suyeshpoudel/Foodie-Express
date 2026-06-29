@@ -1,0 +1,57 @@
+<div class="card-food mb-4 overflow-hidden" id="order-{{ order.uid }}" data-status="{{ order.status }}"
+     hx-get="{% url 'order_card' order.uid %}" hx-trigger="every 20s" hx-swap="outerHTML" hx-target="this">
+    <div class="p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-start mb-3">
+            <div>
+                <h5 class="fw-bold mb-1">
+                    Order #{{ order.uid|truncatechars:8 }}
+                    <span class="badge bg-{% if order.status == 'Delivered' %}success{% elif order.status == 'Cancel' %}danger{% elif order.status == 'Accepted' %}info{% elif order.status == 'Packed' %}warning text-dark{% elif order.status == 'On the way' %}primary{% else %}secondary{% endif %} ms-2 fs-6">
+                        {{ order.status }}
+                    </span>
+                </h5>
+                <small class="text-muted">
+                    <i class="fas fa-calendar-alt me-1"></i> {{ order.created_at|date:"F d, Y" }} at {{ order.created_at|time:"h:i A" }}
+                </small>
+            </div>
+            <div class="text-end">
+                <div class="fw-bold fs-5" style="color: var(--primary);">NPR {{ order.get_cart_total }}</div>
+                <small class="text-muted">{{ order.cart_item.count }} item{{ order.cart_item.count|pluralize }}</small>
+            </div>
+        </div>
+
+        <div class="order-timeline-{{ order.uid }}">
+            {% include '_order_timeline.html' %}
+        </div>
+
+        {% if order.delivery_address %}
+        <div class="mb-3 p-3 rounded" style="background: #fafaf9; border: 1px solid #e6ddc5;">
+            <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
+                <div>
+                    <span class="fw-semibold small">{{ order.delivery_address.full_name }}</span>
+                    <span class="text-muted small"> | {{ order.delivery_address.phone }}</span>
+                    <div class="small text-muted">{{ order.delivery_address.street }}, {{ order.delivery_address.city }}{% if order.delivery_address.zip_code %} - {{ order.delivery_address.zip_code }}{% endif %}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <hr class="my-3">
+
+        <div class="row g-2">
+            {% for cart_item in order.cart_item.all %}
+            <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2 p-2 rounded" style="background: #fafaf9;">
+                    <img src="{% if cart_item.item.image %}{{ cart_item.item.image.url }}{% else %}https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=60&h=60&fit=crop{% endif %}"
+                         style="width: 45px; height: 45px; object-fit: cover; border-radius: 8px;">
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold small">{{ cart_item.item.item_name }}</div>
+                        <small class="text-muted">{{ cart_item.quantity }}x @ NPR {{ cart_item.item.price }}</small>
+                    </div>
+                    <small class="fw-bold" style="color: var(--primary);">NPR {{ cart_item.total_cost }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

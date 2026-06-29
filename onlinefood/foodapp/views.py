@@ -285,6 +285,21 @@ def orders(request):
     context = {'orders': orders, 'status_flow': status_flow}
     return render(request, 'orders.html', context)
 
+@login_required(login_url='/login/')
+def order_card(request, order_uid):
+    try:
+        order = Cart.objects.get(uid=order_uid, is_paid=True, user=request.user)
+    except Cart.DoesNotExist:
+        return HttpResponse(status=404)
+
+    status_flow = ['Pending', 'Accepted', 'Packed', 'On the way', 'Delivered']
+    try:
+        order.status_index = status_flow.index(order.status)
+    except ValueError:
+        order.status_index = -1
+
+    return render(request, '_order_card.html', {'order': order, 'status_flow': status_flow})
+
 @login_required(login_url= "/login/")
 def add_item(request):
     categories = ItemCategory.objects.all()
