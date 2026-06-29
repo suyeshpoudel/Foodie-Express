@@ -1,76 +1,126 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block start %}
 
-<div class="container mt-5">
-    <h2 class="mt-5">Featured Items</h2>
-    <div class="row">
+<section class="hero-section">
+    <div class="container position-relative">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <h1>Delicious Food,<br>Delivered <span style="color: var(--primary-light);">Fresh & Fast</span></h1>
+                <p>Explore a world of flavors from the comfort of your home. From local classics to international cuisines — order your favorites with just a tap.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="/all-items/" class="btn btn-primary-custom btn-lg px-4">
+                        <i class="fas fa-utensils me-2"></i>Browse Menu
+                    </a>
+                    <a href="#about" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-info-circle me-2"></i>Learn More
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5 text-center d-none d-lg-block">
+                <i class="fas fa-hamburger" style="font-size: 12rem; color: var(--primary-light); opacity: 0.6;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if featured_items %}
+<section class="container mt-5">
+    <h2 class="section-title">Featured Items</h2>
+    <div class="row g-4">
         {% for item in featured_items %}
-            <div class="col-md-3">
-                <div class="card shadow-lg" style="width: 18rem">
-                    <img src="{% if item.image %}{{ item.image.url }}{% else %}https://via.placeholder.com/300{% endif %}" style="height : 300px;" class="card-img-top">
-                    <div class="card-body">
-                        <h5>{{ item.item_name }}</h5>
-                        <p>Price = {{item.price}} | Category = {{item.category}}</p>
-                        <form method="POST" action="{% url 'add_cart' item.uid %}" style="display:inline">
+        <div class="col-lg-3 col-md-6">
+            <div class="card-food">
+                <div class="overflow-hidden">
+                    <img src="{% if item.image %}{{ item.image.url }}{% else %}https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop{% endif %}" alt="{{ item.item_name }}">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title">{{ item.item_name }}</h5>
+                        <span class="category-badge">{{ item.category }}</span>
+                    </div>
+                    <p class="text-muted small mb-3 flex-grow-1">{{ item.description|truncatechars:60 }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <span class="price-tag">NPR {{ item.price }}</span>
+                        <form method="POST" action="{% url 'add_cart' item.uid %}">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-success">Cart<i class="fa-solid fa-cart-shopping"></i></button>
+                            <button type="submit" class="btn-add-cart btn-sm">
+                                <i class="fas fa-cart-plus me-1"></i> Add
+                            </button>
                         </form>
-                        <a href="#" class="btn btn-primary">20% discount</a>
                     </div>
                 </div>
             </div>
+        </div>
         {% endfor %}
     </div>
-</div>
-<div id="about" class="container my-5">
-    <h2 class="text-center mb-4">About Us</h2>
-    <h5 class="text-center">You can find the best delicious food. The food is easy to order. You can find food from many places such as Nepali, Indian, and many more.</h5>
-</div>
+</section>
+{% endif %}
 
-<!-- Contact Section -->
-  <div id="contact" section class="container my-5">
-            <h2 class="text-center mb-4">Contact Us</h2>
-            <h5 class="text-center">Email: digitalrecipe@gmail.com</h5>
-            <h5 class="text-center">Phone:061******, 98********</h5>
-        </section>
+<section id="about" class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+            <h2 class="section-title text-center d-inline-block mb-4">About Us</h2>
+            <p class="lead text-muted">You can find the best delicious food from many cuisines — Nepali, Indian, Chinese, and more. We make ordering easy so you can focus on enjoying your meal.</p>
+        </div>
+    </div>
+</section>
 
-<div id="reviews" class="container my-5">
-    <h2 class="text-center mb-4">Reviews</h2>
-    <div class="row">
-        <!-- Example Review -->
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Ankit Tiwari</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">★★★★★</h6>
-                    <p class="card-text">Although I specifically  like to eat diet food. I discovered how simple and delicious the food are there in this website.Amazing food! I've tried a few and they turned out great.</p>
+<section id="contact" class="container my-5">
+    <div class="card-food p-4 text-center">
+        <h2 class="section-title d-inline-block mb-4">Contact Us</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-4 mb-3">
+                <div class="p-3">
+                    <i class="fas fa-envelope fa-2x" style="color: var(--primary);"></i>
+                    <p class="mt-2 fw-bold mb-0">Email</p>
+                    <p class="text-muted">digitalrecipe@gmail.com</p>
                 </div>
             </div>
-        </div>
-        <!-- Example Review -->
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Suyesh Poudel</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">★★★★★</h6>
-                    <p class="card-text">I started making new dishes by the help of the food available.Love the variety and the easy-to-follow instructions.</p>
+            <div class="col-md-4 mb-3">
+                <div class="p-3">
+                    <i class="fas fa-phone fa-2x" style="color: var(--primary);"></i>
+                    <p class="mt-2 fw-bold mb-0">Phone</p>
+                    <p class="text-muted">061-******, 98********</p>
                 </div>
             </div>
-        </div>
-        <!-- Example Review -->
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Sandesh Dhakal</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">★★★★★</h6>
-                    <p class="card-text">I only used to eat fried Potatoes made by my mother but after finding food from this website i started ordering and trying many dishes. Great website for finding new food to try. Highly recommended!</p>
+            <div class="col-md-4 mb-3">
+                <div class="p-3">
+                    <i class="fas fa-map-marker-alt fa-2x" style="color: var(--primary);"></i>
+                    <p class="mt-2 fw-bold mb-0">Location</p>
+                    <p class="text-muted">Nepal</p>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
+<section id="reviews" class="container my-5">
+    <h2 class="section-title">What Our Customers Say</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="review-card">
+                <div class="stars mb-2">★★★★★</div>
+                <p class="review-text">"Although I specifically like to eat diet food, I discovered how simple and delicious the food is on this website. Amazing food! I've tried a few and they turned out great."</p>
+                <p class="fw-bold mb-0 mt-3">— Ankit Tiwari</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="review-card">
+                <div class="stars mb-2">★★★★★</div>
+                <p class="review-text">"I started making new dishes with the help of the food available. Love the variety and the easy-to-follow experience. Highly recommended for food lovers!"</p>
+                <p class="fw-bold mb-0 mt-3">— Suyesh Poudel</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="review-card">
+                <div class="stars mb-2">★★★★★</div>
+                <p class="review-text">"Great website for finding new food to try. After finding food from this website, I started ordering and trying many dishes. Highly recommended!"</p>
+                <p class="fw-bold mb-0 mt-3">— Sandesh Dhakal</p>
+            </div>
+        </div>
+    </div>
+</section>
 
-       
 {% endblock %}

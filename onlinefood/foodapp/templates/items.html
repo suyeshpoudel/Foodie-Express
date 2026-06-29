@@ -2,62 +2,235 @@
 
 {% block start %}
 
-<div class="container mt-5">
-    <h2 class="mt-5">All Items</h2>
-    <div class="row">
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-utensils me-2"></i>Our Menu</h1>
+        <p>Discover our delicious selection of food items</p>
+    </div>
+</div>
+
+<div class="container">
+    {% if request.GET.search or active_category %}
+    <div class="mb-4">
+        <p class="text-muted">
+            {% if request.GET.search %}
+            <i class="fas fa-search me-1"></i> Showing results for "<strong>{{ request.GET.search }}</strong>"
+            {% endif %}
+            {% if active_category %}
+            {% if request.GET.search %} &middot; {% endif %}
+            <i class="fas fa-tag me-1"></i> Category: <strong>{{ active_category }}</strong>
+            {% endif %}
+            <a href="/all-items/" class="ms-2 text-decoration-none"><i class="fas fa-times"></i> Clear</a>
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Category Filter -->
+    {% if categories %}
+    <div class="mb-4">
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/all-items/{% if request.GET.search %}?search={{ request.GET.search }}{% endif %}"
+               class="btn btn-sm rounded-pill px-3 {% if not active_category and not show_favourites %}btn-dark{% else %}btn-outline-secondary{% endif %}">
+                All
+            </a>
+            {% for cat in categories %}
+            <a href="/all-items/?category={{ cat.category_name }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+               class="btn btn-sm rounded-pill px-3 {% if active_category == cat.category_name %}btn-dark{% else %}btn-outline-secondary{% endif %}">
+                {{ cat.category_name }}
+            </a>
+            {% endfor %}
+            {% if request.user.is_authenticated %}
+            <a href="/all-items/?favourites=true{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+               class="btn btn-sm rounded-pill px-3 {% if show_favourites %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                <i class="{% if show_favourites %}fas{% else %}far{% endif %} fa-heart me-1"></i> Favourites
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if items %}
+    <div class="row g-4">
         {% for item in items %}
-            <div class="col-md-3">
-                <div class="card shadow-lg" style="width: 18rem">
-                    <img src="{% if item.image %}{{ item.image.url }}{% else %}https://via.placeholder.com/300{% endif %}" style="height : 300px;" class="card-img-top">
-                    <div class="card-body">
-                        <h5>{{ item.item_name }}</h5>
-                        <p>Price = {{item.price}} | Category = {{item.category}}</p>
-                        <form method="POST" action="{% url 'add_cart' item.uid %}" style="display:inline">
+        <div class="col-lg-3 col-md-6">
+            <div class="card-food">
+                <div class="overflow-hidden position-relative">
+                    <img src="{% if item.image %}{{ item.image.url }}{% else %}https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop{% endif %}" alt="{{ item.item_name }}">
+                    {% if request.user.is_authenticated %}
+                    <span id="fav-{{ item.uid|cut:'-' }}" class="position-absolute top-0 start-0 m-2">
+                        <button hx-post="{% url 'toggle_favourite' item.uid %}" hx-target="#fav-{{ item.uid|cut:'-' }}" hx-swap="outerHTML" class="btn btn-sm rounded-circle p-1" style="width: 34px; height: 34px; background: rgba(255,255,255,0.85); border: none; font-size: 1.2rem; line-height: 1; color: {% if item.uid in favourite_uids %}var(--accent){% else %}#ccc{% endif %};">
+                            <i class="{% if item.uid in favourite_uids %}fas{% else %}far{% endif %} fa-heart"></i>
+                        </button>
+                    </span>
+                    {% endif %}
+                    {% if request.user.is_superuser %}
+                    <div class="position-absolute top-0 end-0 m-2 d-flex gap-1">
+                        <form method="POST" action="{% url 'delete_item' item.uid %}">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-success">Cart<i class="fa-solid fa-cart-shopping"></i></button>
+                            <button type="submit" class="btn btn-danger btn-sm" style="border-radius: 8px;" onclick="return confirm('Delete this item?')">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </form>
-                        <a href="#" class="btn btn-primary">20% discount</a>
-                        {% if request.user.is_superuser %}
-                        <form method="POST" action="{% url 'delete_item' item.uid %}" style="display:inline">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger m-2">Delete</button>
-                        </form>
-                        <a href = "/update-recipe/{{item.uid}}" class = "btn btn-success">Update</a>
+                        <a href="/update-recipe/{{item.uid}}" class="btn btn-warning btn-sm" style="border-radius: 8px;">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <h5 class="card-title">{{ item.item_name }}</h5>
+                        <span class="category-badge">{{ item.category }}</span>
+                    </div>
+                    <div class="mb-2" style="font-size: 0.75rem;">
+                        {% with avg=item.avg_rating|default:0 %}
+                        {% if avg > 0 %}
+                            {% for i in "12345" %}
+                            <i class="fas fa-star{% if forloop.counter > avg %}-o text-muted{% else %}" style="color: #ffb703;{% endif %}"></i>
+                            {% endfor %}
+                            <span class="text-muted ms-1" style="font-size: 0.7rem;">{{ avg|floatformat:1 }}</span>
+                        {% else %}
+                            <span class="text-muted">No reviews</span>
                         {% endif %}
+                        {% endwith %}
+                    </div>
+                    <p class="text-muted small mb-3 flex-grow-1">{{ item.description|truncatechars:60 }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <div>
+                            <span class="price-tag">NPR {{ item.price }}</span>
+                            <button type="button" class="d-block btn btn-sm btn-link text-decoration-none p-0 mt-1" style="font-size: 0.7rem;" data-bs-toggle="modal" data-bs-target="#reviewModal{{ item.uid|cut:'-' }}">
+                                <i class="fas fa-comment me-1"></i> Reviews
+                            </button>
+                        </div>
+                        <form method="POST" action="{% url 'add_cart' item.uid %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-add-cart btn-sm">
+                                <i class="fas fa-cart-plus me-1"></i> Add to Cart
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
-        {% empty %}
-            <p class="text-center">No items found.</p>
+        </div>
+
+        <!-- Review Modal -->
+        <div class="modal fade" id="reviewModal{{ item.uid|cut:'-' }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: var(--radius); border: none;">
+                    <div class="modal-header" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; border: none;">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-star me-2"></i>{{ item.item_name }} Reviews</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+                        {% with reviews=item.reviews.all %}
+                        {% if reviews %}
+                        {% for review in reviews %}
+                        <div class="mb-3 p-3 rounded" style="background: #fefce8;">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-semibold small">{{ review.user.get_full_name|default:review.user.username }}</span>
+                                <span style="font-size: 0.75rem;">
+                                    {% for i in "12345" %}
+                                    <i class="fas fa-star{% if forloop.counter > review.rating %}-o text-muted{% else %}" style="color: #ffb703;{% endif %}"></i>
+                                    {% endfor %}
+                                </span>
+                            </div>
+                            {% if review.text %}
+                            <p class="small text-muted mb-0">{{ review.text }}</p>
+                            {% endif %}
+                            <small class="text-muted" style="font-size: 0.6rem;">{{ review.created_at|date:"M d, Y" }}</small>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-comment-slash" style="font-size: 2rem; color: #ddd;"></i>
+                            <p class="text-muted small mt-2 mb-0">No reviews yet. Be the first!</p>
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                    {% if request.user.is_authenticated %}
+                    <div class="modal-footer" style="border-top: 1px solid #f0f0f0; padding: 1rem;">
+                        <form method="POST" action="{% url 'add_review' item.uid %}" class="w-100">
+                            {% csrf_token %}
+                            <div class="mb-2">
+                                <label class="form-label-custom small">Your Rating</label>
+                                <div class="star-rating">
+                                    {% for i in "54321" %}
+                                    <input type="radio" id="star{{ i }}_{{ item.uid|cut:'-' }}" name="rating" value="{{ i }}"{% if forloop.last %} checked{% endif %}>
+                                    <label for="star{{ i }}_{{ item.uid|cut:'-' }}" class="fas fa-star"></label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <textarea name="text" class="form-control form-control-custom form-control-sm" rows="2" placeholder="Write your review (optional)..." style="font-size: 0.85rem;"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary-custom btn-sm w-100">
+                                <i class="fas fa-paper-plane me-1"></i> Submit Review
+                            </button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <div class="modal-footer" style="border-top: 1px solid #f0f0f0; padding: 1rem;">
+                        <p class="small text-muted mb-0 text-center w-100">
+                            <a href="/login/" class="text-decoration-none">Login</a> to leave a review.
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
         {% endfor %}
     </div>
 
     {% if page_obj.paginator.num_pages > 1 %}
-    <nav aria-label="Page navigation" class="mt-4">
+    <nav class="mt-5 pagination-custom">
         <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">&laquo; First</a>
+                <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Previous</a>
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-left"></i>
+                </a>
             </li>
             {% endif %}
 
-            <li class="page-item active">
-                <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
             </li>
+            {% endif %}
+            {% endfor %}
 
             {% if page_obj.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Next</a>
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-right"></i>
+                </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Last &raquo;</a>
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
             </li>
             {% endif %}
         </ul>
     </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-search"></i>
+        <h4>No items found</h4>
+        <p>Try a different search term or browse our full menu.</p>
+        <a href="/all-items/" class="btn btn-primary-custom"><i class="fas fa-utensils me-2"></i>View All Items</a>
+    </div>
     {% endif %}
 </div>
 

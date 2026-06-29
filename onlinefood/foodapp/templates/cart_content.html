@@ -1,0 +1,222 @@
+{% if carts and cart_items %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="table-responsive">
+                <table class="table table-modern mb-0">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Qty</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cartitem in cart_items %}
+                        <tr>
+                            <td style="width: 80px;">
+                                <img src="{% if cartitem.item.image %}{{ cartitem.item.image.url }}{% else %}https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100&h=100&fit=crop{% endif %}" 
+                                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px;">
+                            </td>
+                            <td class="fw-semibold">{{ cartitem.item.item_name }}</td>
+                            <td>NPR {{ cartitem.item.price }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-1">
+                                    <button hx-post="{% url 'update_cart_item' cartitem.uid %}" hx-vals='{"action":"decrease"}' hx-target="#cart-main" hx-swap="innerHTML" class="btn btn-sm btn-outline-secondary" style="width: 30px; height: 30px; border-radius: 8px; padding: 0; font-weight: 700;">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <span class="fw-bold mx-1" style="min-width: 24px; text-align: center;">{{ cartitem.quantity }}</span>
+                                    <button hx-post="{% url 'update_cart_item' cartitem.uid %}" hx-vals='{"action":"increase"}' hx-target="#cart-main" hx-swap="innerHTML" class="btn btn-sm btn-outline-secondary" style="width: 30px; height: 30px; border-radius: 8px; padding: 0; font-weight: 700;">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="fw-bold" style="color: var(--primary);">NPR {{ cartitem.total_cost }}</td>
+                            <td>
+                                <button hx-post="{% url 'remove_cart_items' cartitem.uid %}" hx-target="#cart-main" hx-swap="innerHTML" class="btn btn-sm btn-danger-custom">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-food card-food-static p-4 mt-4">
+                <h5 class="fw-bold mb-3" style="color: var(--secondary);">
+                    <i class="fas fa-map-marker-alt me-2" style="color: var(--primary);"></i>Delivery Address
+                </h5>
+
+                {% if addresses %}
+                <div class="mb-3">
+                    {% for address in addresses %}
+                    <div class="d-flex align-items-center p-3 mb-2 rounded" style="border: 2px solid {% if carts.delivery_address == address %}var(--primary){% else %}#e9ecef{% endif %}; background: {% if carts.delivery_address == address %}#fef9c3{% endif %};">
+                        <div class="flex-grow-1" style="min-width: 0;">
+                            <div class="fw-semibold text-truncate">{{ address.full_name }}</div>
+                            <small class="text-muted" style="word-break: break-word;">{{ address.street }}, {{ address.city }}{% if address.zip_code %} - {{ address.zip_code }}{% endif %}</small>
+                            <div><small class="text-muted"><i class="fas fa-phone me-1"></i>{{ address.phone }}</small></div>
+                            {% if address.zone %}<span class="badge bg-info text-dark" style="font-size: 0.65rem;">{{ address.zone.name }}</span>{% endif %}
+                            {% if address.is_default %}<span class="badge bg-primary" style="font-size: 0.65rem;">Default</span>{% endif %}
+                        </div>
+                        <form method="POST" action="{% url 'add_address' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="address_uid" value="{{ address.uid }}">
+                            <button type="submit" class="btn btn-sm {% if carts.delivery_address == address %}btn-success{% else %}btn-outline-primary{% endif %}" style="border-radius: 8px;">
+                                {% if carts.delivery_address == address %}<i class="fas fa-check me-1"></i> Selected{% else %}Select{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <button class="btn btn-outline-primary btn-sm mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#newAddressForm" style="border-radius: 8px;">
+                    <i class="fas fa-plus me-1"></i> Add New Address
+                </button>
+
+                <div class="collapse" id="newAddressForm">
+                    <form method="POST" action="{% url 'add_address' %}">
+                        {% csrf_token %}
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label-custom small">Full Name</label>
+                                <input type="text" name="full_name" class="form-control form-control-custom form-control-sm" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom small">Phone</label>
+                                <input type="text" name="phone" class="form-control form-control-custom form-control-sm" required>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label-custom small">Street</label>
+                                <input type="text" name="street" class="form-control form-control-custom form-control-sm" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label-custom small">City</label>
+                                <input type="text" name="city" class="form-control form-control-custom form-control-sm" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label-custom small">Zip Code</label>
+                                <input type="text" name="zip_code" class="form-control form-control-custom form-control-sm">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label-custom small">Delivery Zone</label>
+                                <select name="zone" class="form-control form-control-custom form-control-sm" style="max-width: 100%;">
+                                    <option value="">Select zone</option>
+                                    {% for zone in zones %}
+                                    <option value="{{ zone.uid }}">{{ zone.name }} (~{{ zone.delivery_time }} min)</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom btn-sm mt-2">
+                            <i class="fas fa-save me-1"></i> Save & Select
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card-food card-food-static p-4">
+                <h5 class="fw-bold mb-4" style="color: var(--secondary);">Order Summary</h5>
+
+                <div class="mb-3 p-2 rounded" style="background: #fefce8;">
+                    {% if coupon %}
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-success me-1">{{ coupon.code }}</span>
+                            <small class="text-muted">{{ coupon.discount_percent }}% off</small>
+                        </div>
+                        <form method="POST" action="{% url 'remove_coupon' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius: 8px; font-size: 0.7rem;">
+                                <i class="fas fa-times"></i> Remove
+                            </button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <form method="POST" action="{% url 'apply_coupon' %}" class="d-flex gap-1">
+                        {% csrf_token %}
+                        <input type="text" name="code" class="form-control form-control-sm" placeholder="Coupon code" style="font-size: 0.8rem; border-radius: 8px;">
+                        <button type="submit" class="btn btn-sm btn-outline-primary" style="border-radius: 8px; white-space: nowrap; font-size: 0.75rem;">
+                            Apply
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Subtotal</span>
+                    <span class="fw-semibold">NPR {{ subtotal|default:carts.get_cart_total }}</span>
+                </div>
+                {% if discount_amount %}
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Discount ({{ coupon.discount_percent }}%)</span>
+                    <span class="fw-semibold" style="color: var(--success);">-NPR {{ discount_amount }}</span>
+                </div>
+                {% endif %}
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Tax ({{ tax_rate }}%)</span>
+                    <span class="fw-semibold">NPR {{ tax_amount }}</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="fw-bold fs-5">Total</span>
+                    <span class="fw-bold fs-5" style="color: var(--primary);">NPR {{ total_amount }}</span>
+                </div>
+
+                {% if estimated_arrival %}
+                <div class="alert alert-success py-2 small text-center mb-3" style="border-radius: 8px; font-weight: 600;">
+                    <i class="fas fa-clock me-1"></i> Arrives by {{ estimated_arrival|date:"h:i A" }}
+                </div>
+                {% endif %}
+
+                {% if carts.delivery_address %}
+                <form action="https://rc-epay.esewa.com.np/api/epay/main/v2/form" method="POST" target="_blank">
+                    <input type="hidden" name="amount" value="{{ subtotal|default:carts.get_cart_total }}" required>
+                    <input type="hidden" name="tax_amount" value="{{ tax_amount }}" required>
+                    <input type="hidden" name="total_amount" value="{{ total_amount }}" required>
+                    <input type="hidden" name="transaction_uuid" value="{{ transaction_uuid }}" required>
+                    <input type="hidden" name="product_code" value="{{ esewa_product_code }}" required>
+                    <input type="hidden" name="product_service_charge" value="0" required>
+                    <input type="hidden" name="product_delivery_charge" value="0" required>
+                    <input type="hidden" name="success_url" value="{{ esewa_success_url }}" required>
+                    <input type="hidden" name="failure_url" value="{{ esewa_failure_url }}" required>
+                    <input type="hidden" name="signed_field_names" value="total_amount,transaction_uuid,product_code" required>
+                    <input type="hidden" name="signature" value="{{ signature }}" required>
+                    <button type="submit" class="esewa-btn">
+                        <i class="fas fa-credit-card me-2"></i> Pay with eSewa
+                    </button>
+                </form>
+                {% else %}
+                <div class="alert alert-warning py-2 small text-center mb-0" style="border-radius: 8px;">
+                    <i class="fas fa-info-circle me-1"></i> Please select a delivery address above to proceed.
+                </div>
+                {% endif %}
+
+                <div class="text-center mt-3">
+                    <a href="/all-items/" class="text-decoration-none small">
+                        <i class="fas fa-arrow-left me-1"></i> Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% elif carts %}
+    <div class="empty-state">
+        <i class="fas fa-shopping-cart"></i>
+        <h4>Your cart is empty</h4>
+        <p>Looks like you haven't added any items yet. Browse our menu and add some delicious food!</p>
+        <a href="/all-items/" class="btn btn-primary-custom"><i class="fas fa-utensils me-2"></i> Browse Menu</a>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <i class="fas fa-shopping-cart"></i>
+        <h4>Your cart is empty</h4>
+        <p>Login to start adding items to your cart.</p>
+        <a href="/login/" class="btn btn-primary-custom"><i class="fas fa-sign-in-alt me-2"></i> Login</a>
+    </div>
+{% endif %}

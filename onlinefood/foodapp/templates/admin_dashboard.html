@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block start %}
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-chart-line me-2"></i>Admin Dashboard</h1>
+        <p>Overview of orders, revenue, and popular items</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card-food p-3 text-center" style="height: 100%;">
+                <div class="text-muted small text-uppercase fw-semibold">Orders Today</div>
+                <div class="fw-bold fs-3" style="color: var(--primary);">{{ today_count }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card-food p-3 text-center" style="height: 100%;">
+                <div class="text-muted small text-uppercase fw-semibold">Revenue Today</div>
+                <div class="fw-bold fs-3" style="color: var(--success);">NPR {{ today_revenue }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card-food p-3 text-center" style="height: 100%;">
+                <div class="text-muted small text-uppercase fw-semibold">Total Revenue</div>
+                <div class="fw-bold fs-3" style="color: var(--primary);">NPR {{ total_revenue }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card-food p-3 text-center" style="height: 100%;">
+                <div class="text-muted small text-uppercase fw-semibold">Total Orders</div>
+                <div class="fw-bold fs-3" style="color: var(--secondary);">{{ total_orders }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card-food p-4">
+                <h5 class="fw-bold mb-3" style="color: var(--secondary);">
+                    <i class="fas fa-chart-bar me-2" style="color: var(--primary);"></i>Orders & Revenue (Last 7 Days)
+                </h5>
+                <canvas id="ordersChart" height="200"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card-food p-4">
+                <h5 class="fw-bold mb-3" style="color: var(--secondary);">
+                    <i class="fas fa-chart-pie me-2" style="color: var(--primary);"></i>Order Status
+                </h5>
+                <canvas id="statusChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-5">
+            <div class="card-food p-4">
+                <h5 class="fw-bold mb-3" style="color: var(--secondary);">
+                    <i class="fas fa-fire me-2" style="color: var(--primary);"></i>Popular Items
+                </h5>
+                {% if popular %}
+                <div class="list-group list-group-flush">
+                    {% for item in popular %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 border-0">
+                        <span class="fw-semibold small">{{ item.item__item_name }}</span>
+                        <span class="badge bg-dark rounded-pill">{{ item.total_qty }} sold</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-box-open" style="font-size: 2rem; color: #ddd;"></i>
+                    <p class="text-muted small mt-2 mb-0">No items sold yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card-food p-4">
+                <h5 class="fw-bold mb-3" style="color: var(--secondary);">
+                    <i class="fas fa-clock me-2" style="color: var(--primary);"></i>Recent Orders
+                </h5>
+                {% if orders %}
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0" style="font-size: 0.8rem;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <th scope="row" class="fw-bold">{{ forloop.counter }}</th>
+                                <td>
+                                    <div class="fw-semibold">{{ order.user.get_full_name|default:order.user.username }}</div>
+                                </td>
+                                <td>
+                                    <ul class="list-unstyled mb-0">
+                                        {% for cart_item in order.cart_item.all|slice:":2" %}
+                                        <li><span class="small">{{ cart_item.quantity }}x {{ cart_item.item.item_name }}</span></li>
+                                        {% endfor %}
+                                        {% if order.cart_item.count > 2 %}<li class="text-muted" style="font-size: 0.65rem;">+{{ order.cart_item.count|add:"-2" }} more</li>{% endif %}
+                                    </ul>
+                                </td>
+                                <td class="fw-bold" style="color: var(--primary);">NPR {{ order.get_cart_total }}</td>
+                                <td>
+                                    <span class="badge bg-{% if order.status == 'Delivered' %}success{% elif order.status == 'Cancel' %}danger{% elif order.status == 'Accepted' %}info{% elif order.status == 'Packed' %}warning text-dark{% elif order.status == 'On the way' %}primary{% else %}secondary{% endif %}" style="font-size: 0.65rem;">
+                                        {{ order.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                    <a href="{% url 'export_orders_csv' %}" class="small text-decoration-none" style="color: var(--success);">
+                        <i class="fas fa-file-csv me-1"></i> Export CSV
+                    </a>
+                    <a href="/all-orders/" class="small text-decoration-none">View all orders <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-inbox" style="font-size: 2rem; color: #ddd;"></i>
+                    <p class="text-muted small mt-2 mb-0">No orders yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    var statusCtx = document.getElementById('statusChart');
+    if (statusCtx) {
+        var statusLabels = [], statusData = [], statusColors = [];
+        var colorMap = {
+            'Pending': '#6c757d', 'Accepted': '#0dcaf0', 'Packed': '#ffc107',
+            'On the way': '#0d6efd', 'Delivered': '#2d6a4f', 'Cancel': '#dc3545'
+        };
+        {% for s in status_counts %}
+        statusLabels.push('{{ s.status }}');
+        statusData.push({{ s.count }});
+        statusColors.push(colorMap['{{ s.status }}'] || '#6c757d');
+        {% endfor %}
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusData,
+                    backgroundColor: statusColors,
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 11 } } }
+                }
+            }
+        });
+    }
+
+    var ordersCtx = document.getElementById('ordersChart');
+    if (ordersCtx) {
+        new Chart(ordersCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for l in daily_labels %}'{{ l }}',{% endfor %}],
+                datasets: [
+                    {
+                        label: 'Orders',
+                        data: [{% for c in daily_counts %}{{ c }},{% endfor %}],
+                        backgroundColor: 'rgba(232,93,4,0.7)',
+                        borderRadius: 6,
+                        order: 2,
+                    },
+                    {
+                        label: 'Revenue (NPR)',
+                        data: [{% for r in daily_revenues %}{{ r }},{% endfor %}],
+                        type: 'line',
+                        borderColor: '#2d6a4f',
+                        backgroundColor: 'rgba(45,106,79,0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#2d6a4f',
+                        borderWidth: 2,
+                        order: 1,
+                        yAxisID: 'y1',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'top', labels: { boxWidth: 12, padding: 12, font: { size: 11 } } }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, grid: { display: false } },
+                    y1: {
+                        beginAtZero: true,
+                        position: 'right',
+                        ticks: { font: { size: 10 }, callback: function(v) { return 'NPR ' + v; } },
+                        grid: { display: false },
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+})();
+</script>
+
+{% endblock %}

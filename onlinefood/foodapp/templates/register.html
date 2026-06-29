@@ -1,44 +1,75 @@
 {% extends "base.html" %}
+
 {% block start %}
 
-<div class="container mt-5">
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-user-plus me-2"></i>Create Account</h1>
+        <p>Join Foodie Express and start ordering delicious food</p>
+    </div>
+</div>
 
-    <form class="col-6 mx-auto card p-3 shadow lg" method="post", enctype="multipart/form-data">
-        {% csrf_token %}
-        <h2>Register</h2>
-        <hr>
-        {% if messages %}
-        {{ message.tags }}
-        <div class="alert alert-primary" role="alert">
-            {% for message in messages%}
-            {{ message }}
-            {% endfor %}
-          </div>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card-form">
+                <div class="card-header text-center">
+                    <i class="fas fa-user-plus fa-3x mb-2" style="opacity: 0.8;"></i>
+                    <h3>Register</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-custom alert-info d-flex align-items-center">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
 
-        {% endif %}
-        <div class="mb-3">
-            <label for="first_name" class="form-label">First Name</label>
-            <input type="text" class="form-control"name = "first_name" id="first_name">
-          </div>
-
-          <div class="mb-3">
-            <label for="last_name" class="form-label">Last Name</label>
-            <input type="text" class="form-control" name= "last_name" id="last_name">
-          </div>
-
-            <div class="mb-3">
-              <label for="username" class="form-label">Username</label>
-              <input type="text" class="form-control" name= "username" id="username">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label-custom">First Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-user text-muted"></i></span>
+                                    <input type="text" class="form-control form-control-custom" name="first_name" id="first_name" placeholder="John" required style="border-left: none;">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label-custom">Last Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-user text-muted"></i></span>
+                                    <input type="text" class="form-control form-control-custom" name="last_name" id="last_name" placeholder="Doe" required style="border-left: none;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="username" class="form-label-custom">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-user-circle text-muted"></i></span>
+                                <input type="text" class="form-control form-control-custom" name="username" id="username" placeholder="Choose a username" required style="border-left: none;">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label-custom">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-lock text-muted"></i></span>
+                                <input type="password" class="form-control form-control-custom" name="password" id="password" placeholder="Create a strong password" required style="border-left: none;">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-3">
+                            <i class="fas fa-user-plus me-2"></i> Create Account
+                        </button>
+                        <p class="text-center text-muted mb-0">
+                            Already have an account? <a href="/login/" class="text-decoration-none fw-semibold" style="color: var(--primary);">Login</a>
+                        </p>
+                    </form>
+                </div>
             </div>
-            <div class="mb-3">
-              <label for="password" class="form-label">Password</label>
-              <input type="password" class="form-control" name= "password" id="password">
-            </div>
-
-            <p>Already have an account? <a href="/login/">Login</a></p>
-            
-            <button type="submit" class="btn btn-primary">Register</button>
-          </form>
         </div>
+    </div>
+</div>
 
 {% endblock %}

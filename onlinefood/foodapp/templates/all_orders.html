@@ -2,39 +2,95 @@
 
 {% block start %}
 
-<div class="container card shadow-lg mt-5">
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">S.No.</th>
-                <th scope="col">Total</th>
-                <th scope="col">Order Date and Time</th>
-                <th scope="col">Items</th>
-                <th scope="col">Location</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in orders %}
-            <tr>
-                <th scope="row">{{forloop.counter}}</th>
-                <td>{{order.get_cart_total}}</td>
-                <td>
-                    {{order.created_at}}
-                </td>
-                <td>
-                    <ul>
-                        {% for cart_item in order.cart_item.all %}
-                        <li>{{ cart_item.item.item_name }} ({{ cart_item.quantity }})</li>
-                        {% endfor %}
-                    </ul>
-                </td>
-            
-            </tr>
-            {% endfor %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-clipboard-list me-2"></i>All Orders</h1>
+        <p>Manage and update order statuses</p>
+    </div>
+</div>
 
-
-        </tbody>
-    </table>
+<div class="container">
+    {% if orders %}
+    <div class="table-responsive">
+        <table class="table table-modern">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Items</th>
+                    <th>Delivery Address</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <th scope="row" class="fw-bold">{{ forloop.counter }}</th>
+                    <td>
+                        <div class="fw-semibold">{{ order.user.get_full_name|default:order.user.username }}</div>
+                        <small class="text-muted">{{ order.user.email }}</small>
+                    </td>
+                    <td>
+                        <div class="fw-semibold small">{{ order.created_at|date:"M d, Y" }}</div>
+                        <small class="text-muted">{{ order.created_at|time:"h:i A" }}</small>
+                    </td>
+                    <td>
+                        <ul class="list-unstyled mb-0">
+                            {% for cart_item in order.cart_item.all %}
+                            <li class="mb-1">
+                                <span class="badge bg-light text-dark me-1" style="font-size: 0.7rem;">{{ cart_item.quantity }}x</span>
+                                <span class="small">{{ cart_item.item.item_name }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        {% if order.delivery_address %}
+                        <div class="small">
+                            <div class="fw-semibold">{{ order.delivery_address.full_name }}</div>
+                            <div class="text-muted">{{ order.delivery_address.street }}, {{ order.delivery_address.city }}</div>
+                            <div class="text-muted"><i class="fas fa-phone me-1"></i>{{ order.delivery_address.phone }}</div>
+                        </div>
+                        {% else %}
+                        <span class="text-muted small">Not provided</span>
+                        {% endif %}
+                    </td>
+                    <td class="fw-bold" style="color: var(--primary);">NPR {{ order.get_cart_total }}</td>
+                    <td>
+                        <span class="badge bg-{% if order.status == 'Delivered' %}success{% elif order.status == 'Cancel' %}danger{% elif order.status == 'Accepted' %}info{% elif order.status == 'Packed' %}warning text-dark{% elif order.status == 'On the way' %}primary{% else %}secondary{% endif %} fs-6">
+                            {{ order.status }}
+                        </span>
+                    </td>
+                    <td style="min-width: 160px;">
+                        <form method="POST" action="{% url 'update_order_status' order.uid %}" class="d-flex gap-1">
+                            {% csrf_token %}
+                            <select name="status" class="form-control form-control-sm" style="font-size: 0.8rem; border-radius: 8px;">
+                                {% for status_code, status_label in status_choices %}
+                                <option value="{{ status_code }}" {% if order.status == status_code %}selected{% endif %}>
+                                    {{ status_label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-primary-custom btn-sm" style="white-space: nowrap; font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-clipboard-list"></i>
+        <h4>No orders placed yet</h4>
+        <p>Orders from customers will appear here once they complete payment.</p>
+    </div>
+    {% endif %}
 </div>
 
 {% endblock %}

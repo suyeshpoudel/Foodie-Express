@@ -1,34 +1,59 @@
 {% extends "base.html" %}
+
 {% block start %}
 
-<div class="container mt-5">
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-sign-in-alt me-2"></i>Welcome Back</h1>
+        <p>Sign in to your account to continue</p>
+    </div>
+</div>
 
-    <form class="col-6 mx-auto card p-3 shadow lg" method="post", enctype="multipart/form-data">
-        {% csrf_token %}
-        <h2>Login</h2>
-        <hr>
-        {% if messages %}
-        {{ message.tags }}
-        <div class="alert alert-primary" role="alert">
-            {% for message in messages%}
-            {{ message }}
-            {% endfor %}
-          </div>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card-form">
+                <div class="card-header text-center">
+                    <i class="fas fa-user-circle fa-3x mb-2" style="opacity: 0.8;"></i>
+                    <h3>Login</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-custom alert-{% if message.tags == 'error' %}danger{% else %}info{% endif %} d-flex align-items-center">
+                        <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
 
-        {% endif %}
-            <div class="mb-3">
-              <label for="username" class="form-label">Username</label>
-              <input type="text" class="form-control" name= "username" id="username">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="username" class="form-label-custom">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-user text-muted"></i></span>
+                                <input type="text" class="form-control form-control-custom" name="username" id="username" placeholder="Enter your username" required style="border-left: none;">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label-custom">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-lock text-muted"></i></span>
+                                <input type="password" class="form-control form-control-custom" name="password" id="password" placeholder="Enter your password" required style="border-left: none;">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-3">
+                            <i class="fas fa-sign-in-alt me-2"></i> Login
+                        </button>
+                        <p class="text-center text-muted mb-0">
+                            Don't have an account? <a href="/register/" class="text-decoration-none fw-semibold" style="color: var(--primary);">Register</a>
+                        </p>
+                    </form>
+                </div>
             </div>
-            <div class="mb-3">
-              <label for="password" class="form-label">Password</label>
-              <input type="password" class="form-control" name="password" id="password">
-            </div>
-            
-            <p>Don't have an account? <a href="/register/">Register</a></p>
-
-            <button type="submit" class="btn btn-primary">Login</button>
-          </form>
         </div>
+    </div>
+</div>
 
 {% endblock %}

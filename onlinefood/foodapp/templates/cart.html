@@ -2,74 +2,27 @@
 
 {% block start %}
 
-<div class="container card shadow-lg mt-5">
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">S.No.</th>
-                <th scope="col">Action</th>
-                <th scope="col">Item</th>
-                <th scope="col">Name</th>
-                <th scope="col">Price</th>
-                <th scope="col">Quantity</th>
-                <th scope="col">Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for cartitems in carts.cart_item.all %}
-            <tr>
-                <th scope="row">{{forloop.counter}}</th>
-                <th>
-                    <form method="POST" action="{% url 'remove_cart_items' cartitems.uid %}" style="display:inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash-can"></i></button>
-                    </form>
-                </th>
-                <td><img src ='{{cartitems.item.image.url}}' style="height:100px; width:100px"></td>
-                <td>{{cartitems.item.item_name}}</td>
-                <td>{{cartitems.item.price}}</td>
-                <td>
-                    {{cartitems.quantity}}
-                </td>
-                <td>
-                    
-                    {{cartitems.total_cost}}
-                    
-                </td>
-            </tr>
-            
-            {% endfor %}
-            <tr>
-                <th scope="row"></th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>
-                    <p style="font-weight: 750;">Grand Total</p>
-                    <p>{{carts.get_cart_total}}</p>
-                    <form action="https://rc-epay.esewa.com.np/api/epay/main/v2/form" method="POST" target="_blank">
-                        <input type="hidden" name="amount" value="{{carts.get_cart_total}}" required>
-                        <input type="hidden" name="tax_amount" value="{{tax_amount}}" required>
-                        <input type="hidden" name="total_amount" value="{{total_amount}}" required>
-                        <input type="hidden" name="transaction_uuid" value="{{transaction_uuid}}" required>
-                        <input type="hidden" name="product_code" value="{{esewa_product_code}}" required>
-                        <input type="hidden" name="product_service_charge" value="0" required>
-                        <input type="hidden" name="product_delivery_charge" value="0" required>
-                        <input type="hidden" name="success_url" value="{{esewa_success_url}}" required>
-                        <input type="hidden" name="failure_url" value="{{esewa_failure_url}}" required>
-                        <input type="hidden" name="signed_field_names" value="total_amount,transaction_uuid,product_code" required>
-                        <input type="hidden" name="signature" value="{{signature}}" required>
-                        <input value=" Pay with eSewa " type="submit" class="button" style="display:block !important; background-color: #60bb46; cursor: pointer; color: #fff; border: none; padding: 5px 10px;">
-                        </form>
-                        
-                    
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<style>
+    .card-food-static:hover {
+        transform: none !important;
+        box-shadow: var(--card-shadow) !important;
+    }
+    .card-food-static {
+        height: auto !important;
+    }
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-shopping-cart me-2"></i>Your Cart</h1>
+        <p>Review your items and proceed to checkout</p>
+    </div>
 </div>
 
+<div class="container">
+<div id="cart-main">
+    {% include 'cart_content.html' %}
+</div>
+</div>
 
 {% endblock %}

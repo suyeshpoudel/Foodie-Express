@@ -1,43 +1,75 @@
 {% extends "base.html" %}
 
 {% block start %}
-{% if request.user.is_superuser %}
-<div class="container mt-5">
 
-    <form class="col-6 mx-auto card p-3 shadow lg" method="post", enctype="multipart/form-data">
-        {% csrf_token %}
-        <h2>Add Item</h2>
-        <hr>
-        
-        <div class="mb-3">
-          <label for="item_name" class="form-label">Item Name</label>
-          <input name="item_name" required type="text" class="form-control">
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-plus-circle me-2"></i>Add Item</h1>
+        <p>Add a new item to the menu</p>
+    </div>
+</div>
+
+{% if request.user.is_superuser %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card-form">
+                <div class="card-header text-center">
+                    <i class="fas fa-hamburger fa-3x mb-2" style="opacity: 0.8;"></i>
+                    <h3>New Menu Item</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="item_name" class="form-label-custom">Item Name</label>
+                            <input name="item_name" required type="text" class="form-control form-control-custom" placeholder="e.g. Chicken Burger">
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label-custom">Description</label>
+                            <textarea name="description" required class="form-control form-control-custom" rows="3" placeholder="Describe the item..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="category" class="form-label-custom">Category</label>
+                            <select name="category" id="category" class="form-control form-control-custom" required>
+                                <option value="">Select a category</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.uid }}">{{ cat.category_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="price" class="form-label-custom">Price (NPR)</label>
+                                <input name="price" required type="number" class="form-control form-control-custom" placeholder="e.g. 500">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="prep_time" class="form-label-custom">Prep Time (min)</label>
+                                <input name="prep_time" type="number" class="form-control form-control-custom" value="15" min="1">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="image" class="form-label-custom">Image</label>
+                                <input name="image" type="file" class="form-control form-control-custom">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom w-100 py-2">
+                            <i class="fas fa-plus-circle me-2"></i> Add Item
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-          <label for="description" class="form-label">Item Description</label>
-          <textarea name= "description" required class="form-control"></textarea>
-        </div>
-        <div class="mb-3">
-            <label for="category">Item Category</label>
-            
-            <select name="category" id="category">
-            <option value="Veg">Veg</option>
-            <option value="Non-Veg">Non-Veg</option>
-            </select>
-          </div><br><br>
-        <div class="mb-3">
-          <label for="price" class="form-label">Item Price</label>
-          <input name="price" required type="number" class="form-control">
-          
-        </div>
-        <div class="mb-3">
-            <label for="image" class="form-label">Item Image</label>
-            <input name= "image" type="file" class="form-control">
-          </div>
-        <button type="submit" class="btn btn-success">Add Item</button>
-      </form>
+    </div>
+</div>
 {% else %}
-<h1>You do not have the permission to add recipes.</h1>
+<div class="container">
+    <div class="empty-state">
+        <i class="fas fa-lock"></i>
+        <h4>Access Denied</h4>
+        <p>You do not have permission to add items. Only administrators can manage the menu.</p>
+        <a href="/" class="btn btn-primary-custom"><i class="fas fa-home me-2"></i> Go Home</a>
+    </div>
+</div>
 {% endif %}
 
 {% endblock %}

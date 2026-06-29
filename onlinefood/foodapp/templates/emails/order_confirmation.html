@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 30px auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+        .header { background: #fafaf9; color: #1c1917; padding: 30px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 800; }
+        .header p { margin: 8px 0 0; opacity: 0.9; font-size: 14px; }
+        .body { padding: 30px; }
+        .order-info { background: #fefae0; border-radius: 10px; padding: 16px; margin-bottom: 20px; }
+        .order-info table { width: 100%; font-size: 14px; }
+        .order-info td { padding: 4px 0; }
+        .order-info td:last-child { text-align: right; font-weight: 600; }
+        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
+        .items-table th { background: #1a1a2e; color: #fff; padding: 10px 12px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .items-table td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; }
+        .items-table tr:last-child td { border-bottom: none; }
+        .total-row td { font-weight: 700; font-size: 16px; color: #ca8a04; padding-top: 14px; border-top: 2px solid #ca8a04; }
+        .delivery-info { background: #fefce8; border: 1px solid #e6ddc5; border-radius: 10px; padding: 16px; margin-bottom: 20px; font-size: 14px; }
+        .delivery-info h4 { margin: 0 0 8px; font-size: 14px; color: #1a1a2e; }
+        .delivery-info p { margin: 4px 0; color: #555; }
+        .footer-text { text-align: center; font-size: 12px; color: #999; padding: 20px 30px; border-top: 1px solid #f0f0f0; }
+        .badge { display: inline-block; background: #2d6a4f; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Order Confirmed!</h1>
+            <p>Thank you, {{ user.get_full_name|default:user.username }}!</p>
+        </div>
+        <div class="body">
+            <div class="order-info">
+                <table>
+                    <tr><td>Order #</td><td>{{ order_uid }}</td></tr>
+                    <tr><td>Date</td><td>{{ ordered_date }}</td></tr>
+                    <tr><td>Status</td><td><span class="badge">Accepted</span></td></tr>
+                </table>
+            </div>
+
+            <table class="items-table">
+                <thead>
+                    <tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>NPR {{ item.price }}</td>
+                        <td>NPR {{ item.total }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="total-row">
+                        <td colspan="3">Total</td>
+                        <td>NPR {{ total }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            {% if address %}
+            <div class="delivery-info">
+                <h4>Delivery Address</h4>
+                <p>{{ address.full_name }}</p>
+                <p>{{ address.phone }}</p>
+                <p>{{ address.street }}, {{ address.city }}{% if address.zip_code %} - {{ address.zip_code }}{% endif %}</p>
+            </div>
+            {% endif %}
+
+            <div class="delivery-info">
+                <h4>Estimated Delivery Time</h4>
+                <p><strong>{{ estimated_delivery }}</strong></p>
+                <p style="font-size: 12px;">Your order is being prepared and will be on its way shortly.</p>
+            </div>
+        </div>
+        <div class="footer-text">
+            Foodie Express &mdash; Delicious food delivered to your doorstep.
+        </div>
+    </div>
+</body>
+</html>
