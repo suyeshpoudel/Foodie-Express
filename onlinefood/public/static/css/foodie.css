@@ -1137,7 +1137,7 @@ textarea.form-control {
 
 .toast-stack {
     position: fixed;
-    top: calc(var(--header-height) + 14px);
+    top: 16px;
     right: 18px;
     z-index: 1090;
     display: flex;
@@ -1148,10 +1148,12 @@ textarea.form-control {
 }
 
 .app-toast {
+    position: relative;
     display: flex;
     align-items: flex-start;
     gap: 10px;
-    padding: 12px 13px;
+    overflow: hidden;
+    padding: 12px 13px 14px;
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     background: var(--surface);
@@ -1211,6 +1213,38 @@ textarea.form-control {
 .app-toast__close:hover {
     background: var(--surface-warm);
     color: var(--ink-800);
+}
+
+.app-toast__progress {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--info);
+    transform-origin: left;
+    animation: toast-progress 5.2s linear forwards;
+}
+
+.app-toast--success .app-toast__progress {
+    background: var(--success);
+}
+
+.app-toast--error .app-toast__progress {
+    background: var(--danger);
+}
+
+.app-toast--warning .app-toast__progress {
+    background: var(--warning);
+}
+
+@keyframes toast-progress {
+    from {
+        transform: scaleX(1);
+    }
+    to {
+        transform: scaleX(0);
+    }
 }
 
 @keyframes toast-in {
@@ -4720,7 +4754,7 @@ textarea.form-control {
     }
 
     .toast-stack {
-        top: calc(var(--header-height) + 8px);
+        top: 12px;
         right: 12px;
         width: calc(100vw - 24px);
     }
@@ -4816,5 +4850,9 @@ textarea.form-control {
         animation-iteration-count: 1 !important;
         scroll-behavior: auto !important;
         transition-duration: 0.01ms !important;
+    }
+
+    .app-toast__progress {
+        display: none;
     }
 }
