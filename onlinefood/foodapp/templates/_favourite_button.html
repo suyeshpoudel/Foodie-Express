@@ -1,0 +1,10 @@
+<span id="fav-{{ item.uid }}">
+    <button hx-post="{% url 'toggle_favourite' item.uid %}"
+            hx-target="#fav-{{ item.uid }}"
+            hx-swap="outerHTML"
+            class="fav-btn {% if item.is_favourite %}is-favourite{% endif %}"
+            aria-label="{% if item.is_favourite %}Remove {{ item.item_name }} from favourites{% else %}Add {{ item.item_name }} to favourites{% endif %}"
+            aria-pressed="{{ item.is_favourite|yesno:'true,false' }}">
+        <i class="{% if item.is_favourite %}fas{% else %}far{% endif %} fa-heart" aria-hidden="true"></i>
+    </button>
+</span>

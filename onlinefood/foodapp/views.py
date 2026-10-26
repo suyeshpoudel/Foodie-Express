@@ -9,7 +9,7 @@ from django.contrib import messages
 import random
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from datetime import timedelta
@@ -26,19 +26,30 @@ from django.conf import settings
 
 # Create your views here.
 def home(request):
+    if request.GET.get("search"):
+        return all_items(request)
+
     queryset = list(Item.objects.all())
     featured_items = random.sample(queryset, min(len(queryset), 4))
-    context = {"featured_items": featured_items}
 
-    queryset = Item.objects.all()
+    preferred_order = ['Veg', 'Non-Veg', 'Chinese', 'Italian', 'Desserts', 'Beverages', 'South Indian']
+    categories_by_name = {
+        category.category_name: category
+        for category in ItemCategory.objects.annotate(item_count=Count('items'))
+    }
+    categories = [categories_by_name[name] for name in preferred_order if name in categories_by_name]
+    categories += [
+        category for name, category in categories_by_name.items()
+        if name not in preferred_order
+    ]
+    for category in categories:
+        category.preview_item = category.items.first()
 
-    if request.GET.get("search"):
-        queryset = queryset.filter(item_name__icontains = request.GET.get("search"))
-
-        context = {"items": queryset}
-
-        return render(request, "items.html", context)
-
+    context = {
+        "featured_items": featured_items,
+        "categories": categories,
+        "total_items": len(queryset),
+    }
     return render(request, "home.html", context)
 
 
@@ -109,6 +120,7 @@ def add_cart(request, item_uid):
     else:
         cart_items.save()
 
+    messages.success(request, f"{item_obj.item_name} added to your cart.")
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 @login_required(login_url= "/login/")
@@ -330,8 +342,13 @@ def add_item(request):
     
 
 def all_items(request):
-    queryset = Item.objects.all().order_by('-created_at')
-    queryset = queryset.annotate(avg_rating=Avg('reviews__rating'))
+    queryset = (
+        Item.objects.all()
+        .select_related('category')
+        .prefetch_related('reviews__user')
+        .order_by('-created_at')
+        .annotate(avg_rating=Avg('reviews__rating'))
+    )
     categories = ItemCategory.objects.all()
 
     if request.GET.get("search"):
@@ -357,6 +374,8 @@ def all_items(request):
         favourite_uids = set(
             FavouriteItem.objects.filter(user=request.user).values_list('item__uid', flat=True)
         )
+    for item in page_obj:
+        item.is_favourite = item.uid in favourite_uids
 
     context = {
         "items": page_obj,
@@ -722,18 +741,8 @@ def toggle_favourite(request, item_uid):
         is_fav = True
 
     if request.headers.get('HX-Request'):
-        colour = 'var(--accent)' if is_fav else '#ccc'
-        icon = 'fas' if is_fav else 'far'
-        html = (
-            f'<span id="fav-{item_uid}" class="position-absolute top-0 start-0 m-2">'
-            f'<button hx-post="/toggle-favourite/{item_uid}/" hx-target="#fav-{item_uid}" hx-swap="outerHTML" '
-            f'class="btn btn-sm rounded-circle p-1" '
-            f'style="width: 34px; height: 34px; background: rgba(255,255,255,0.85); border: none; font-size: 1.2rem; line-height: 1; color: {colour};">'
-            f'<i class="{icon} fa-heart"></i>'
-            f'</button>'
-            f'</span>'
-        )
-        return HttpResponse(html)
+        item.is_favourite = is_fav
+        return render(request, '_favourite_button.html', {'item': item})
 
     return redirect(request.META.get('HTTP_REFERER', '/all-items/'))
 

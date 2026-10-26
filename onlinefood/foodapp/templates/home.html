@@ -1,126 +1,250 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block start %}
+{% block title %}Foodie Express - Delicious Food, Delivered{% endblock %}
 
-<section class="hero-section">
-    <div class="container position-relative">
-        <div class="row align-items-center">
-            <div class="col-lg-7">
-                <h1>Delicious Food,<br>Delivered <span style="color: var(--primary-light);">Fresh & Fast</span></h1>
-                <p>Explore a world of flavors from the comfort of your home. From local classics to international cuisines — order your favorites with just a tap.</p>
-                <div class="d-flex gap-3 flex-wrap">
-                    <a href="/all-items/" class="btn btn-primary-custom btn-lg px-4">
-                        <i class="fas fa-utensils me-2"></i>Browse Menu
-                    </a>
-                    <a href="#about" class="btn btn-outline-light btn-lg px-4">
-                        <i class="fas fa-info-circle me-2"></i>Learn More
-                    </a>
+{% block start %}
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="hero-copy">
+            <span class="hero-eyebrow"><i class="fas fa-bowl-food" aria-hidden="true"></i> Nepali, Indian, Chinese &amp; more</span>
+            <h1 class="hero-title">Delicious food,<br>delivered <span class="highlight">fresh &amp; fast</span></h1>
+            <p class="hero-lead">Explore a world of flavors from the comfort of your home. From local classics to international cuisines — order your favorites with just a tap.</p>
+            <div class="hero-actions">
+                <a href="/all-items/" class="btn btn-brand">
+                    <i class="fas fa-utensils" aria-hidden="true"></i> Browse the menu
+                </a>
+                <a href="#categories" class="btn btn-outline">
+                    <i class="fas fa-grip" aria-hidden="true"></i> Explore categories
+                </a>
+            </div>
+            <div class="hero-stats" aria-label="Foodie Express at a glance">
+                <div class="hero-stat">
+                    <strong>{{ total_items }}</strong>
+                    <span>dishes on the menu</span>
+                </div>
+                <div class="hero-stat-sep" aria-hidden="true"></div>
+                <div class="hero-stat">
+                    <strong>{{ categories|length }}</strong>
+                    <span>cuisine categories</span>
+                </div>
+                <div class="hero-stat-sep" aria-hidden="true"></div>
+                <div class="hero-stat">
+                    <strong>Live</strong>
+                    <span>order updates</span>
                 </div>
             </div>
-            <div class="col-lg-5 text-center d-none d-lg-block">
-                <i class="fas fa-hamburger" style="font-size: 12rem; color: var(--primary-light); opacity: 0.6;"></i>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-collage">
+                <div class="hero-photo hero-photo--main media-frame">
+                    <span class="media-fallback"><i class="fas fa-utensils" aria-hidden="true"></i></span>
+                    <img src="{% static 'item/chicken-biryani.jpg' %}" alt="Chicken biryani served with raita" data-fallback fetchpriority="high">
+                </div>
+                <div class="hero-photo media-frame">
+                    <span class="media-fallback"><i class="fas fa-bowl-food" aria-hidden="true"></i></span>
+                    <img src="{% static 'item/momo.png' %}" alt="Steamed momo dumplings with dipping sauce" data-fallback>
+                </div>
+                <div class="hero-photo media-frame">
+                    <span class="media-fallback"><i class="fas fa-utensils" aria-hidden="true"></i></span>
+                    <img src="{% static 'item/aloodum.jpg' %}" alt="Spiced potato dish garnished with fresh coriander" data-fallback>
+                </div>
+            </div>
+            <div class="hero-logo-badge">
+                <img src="{% static 'rm.png' %}" alt="" width="40" height="40">
+                <span>
+                    <strong>Foodie Express</strong>
+                    <span>Your favorites, ready to order</span>
+                </span>
             </div>
         </div>
     </div>
 </section>
 
-{% if featured_items %}
-<section class="container mt-5">
-    <h2 class="section-title">Featured Items</h2>
-    <div class="row g-4">
-        {% for item in featured_items %}
-        <div class="col-lg-3 col-md-6">
-            <div class="card-food">
-                <div class="overflow-hidden">
-                    <img src="{% if item.image %}{{ item.image.url }}{% else %}https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop{% endif %}" alt="{{ item.item_name }}">
-                </div>
-                <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="card-title">{{ item.item_name }}</h5>
-                        <span class="category-badge">{{ item.category }}</span>
-                    </div>
-                    <p class="text-muted small mb-3 flex-grow-1">{{ item.description|truncatechars:60 }}</p>
-                    <div class="d-flex justify-content-between align-items-center mt-auto">
-                        <span class="price-tag">NPR {{ item.price }}</span>
-                        <form method="POST" action="{% url 'add_cart' item.uid %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-add-cart btn-sm">
-                                <i class="fas fa-cart-plus me-1"></i> Add
-                            </button>
-                        </form>
-                    </div>
-                </div>
+{% if categories %}
+<section class="section" id="categories">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <span class="section-eyebrow">Find your craving</span>
+                <h2 class="section-title">Browse by category</h2>
             </div>
+            <a class="section-link" href="/all-items/">View full menu <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
         </div>
-        {% endfor %}
+        <div class="category-scroller">
+            {% for cat in categories %}
+            <a class="category-card" href="/all-items/?category={{ cat.category_name|urlencode }}">
+                <span class="category-card__img media-frame">
+                    <span class="media-fallback"><i class="fas fa-utensils" aria-hidden="true"></i></span>
+                    {% if cat.preview_item.image %}
+                    <img src="{{ cat.preview_item.image.url }}" alt="" data-fallback loading="lazy">
+                    {% endif %}
+                </span>
+                <span class="category-card__name">{{ cat.category_name }}</span>
+                <span class="category-card__count">{{ cat.item_count }} item{{ cat.item_count|pluralize }}</span>
+            </a>
+            {% endfor %}
+        </div>
     </div>
 </section>
 {% endif %}
 
-<section id="about" class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 text-center">
-            <h2 class="section-title text-center d-inline-block mb-4">About Us</h2>
-            <p class="lead text-muted">You can find the best delicious food from many cuisines — Nepali, Indian, Chinese, and more. We make ordering easy so you can focus on enjoying your meal.</p>
+{% if featured_items %}
+<section class="section section-sm">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <span class="section-eyebrow">Picked for you</span>
+                <h2 class="section-title">Featured today</h2>
+            </div>
+            <a class="section-link" href="/all-items/">See all dishes <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        </div>
+        <div class="food-grid">
+            {% for item in featured_items %}
+            <article class="food-card">
+                <div class="food-media media-frame">
+                    <span class="media-fallback"><i class="fas fa-utensils" aria-hidden="true"></i></span>
+                    <img src="{{ item.image.url }}" alt="{{ item.item_name }}" data-fallback loading="lazy">
+                    <span class="badge-category">{{ item.category|default:"Menu" }}</span>
+                </div>
+                <div class="food-card__body">
+                    <div class="food-card__title-row">
+                        <h3 class="food-card__title">{{ item.item_name }}</h3>
+                    </div>
+                    <p class="food-card__desc">{{ item.description|truncatechars:80 }}</p>
+                    <div class="food-card__footer">
+                        <span class="price"><span class="price-label">NPR</span>{{ item.price }}</span>
+                        <form method="POST" action="{% url 'add_cart' item.uid %}" data-add-to-cart>
+                            {% csrf_token %}
+                            <button type="submit" class="btn-add-cart" aria-label="Add {{ item.item_name }} to cart">
+                                <i class="fas fa-plus" aria-hidden="true"></i><span class="add-label">Add</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="section">
+    <div class="container hero-about">
+        <div class="about-visual media-frame">
+            <span class="media-fallback"><i class="fas fa-bowl-food" aria-hidden="true"></i></span>
+            <img src="{% static 'item/momo.png' %}" alt="Freshly steamed momo dumplings" data-fallback loading="lazy">
+            <div class="about-visual-note">
+                <img src="{% static 'rm.png' %}" alt="" width="32" height="32">
+                <span>Good food, delivered with care</span>
+            </div>
+        </div>
+        <div class="about-copy">
+            <span class="section-eyebrow">About Foodie Express</span>
+            <h2 class="section-title">The food you love, without the runaround</h2>
+            <p>You can find the best delicious food from many cuisines — Nepali, Indian, Chinese, and more. We make ordering easy so you can focus on enjoying your meal.</p>
+            <ul class="feature-list">
+                <li class="feature-item">
+                    <span class="feature-icon"><i class="fas fa-utensils" aria-hidden="true"></i></span>
+                    <div>
+                        <strong>A menu for every craving</strong>
+                        <span>From comforting classics to something new, all in one place.</span>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <span class="feature-icon"><i class="fas fa-bag-shopping" aria-hidden="true"></i></span>
+                    <div>
+                        <strong>Order in a few taps</strong>
+                        <span>Build your cart, choose an address, and check out securely.</span>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <span class="feature-icon"><i class="fas fa-location-dot" aria-hidden="true"></i></span>
+                    <div>
+                        <strong>Follow every order</strong>
+                        <span>See status updates from the kitchen to your doorstep.</span>
+                    </div>
+                </li>
+            </ul>
         </div>
     </div>
 </section>
 
-<section id="contact" class="container my-5">
-    <div class="card-food p-4 text-center">
-        <h2 class="section-title d-inline-block mb-4">Contact Us</h2>
-        <div class="row justify-content-center">
-            <div class="col-md-4 mb-3">
-                <div class="p-3">
-                    <i class="fas fa-envelope fa-2x" style="color: var(--primary);"></i>
-                    <p class="mt-2 fw-bold mb-0">Email</p>
-                    <p class="text-muted">digitalrecipe@gmail.com</p>
+<section class="section section-sm" id="contact">
+    <div class="container">
+        <div class="contact-panel">
+            <div class="contact-panel__intro">
+                <span class="section-eyebrow">Get in touch</span>
+                <h3>Questions before you order?</h3>
+                <p>Reach out and we'll help you find your next favorite meal.</p>
+            </div>
+            <div class="contact-item">
+                <span class="contact-item__icon"><i class="fas fa-envelope" aria-hidden="true"></i></span>
+                <div>
+                    <span>Email</span>
+                    <strong>digitalrecipe@gmail.com</strong>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
-                <div class="p-3">
-                    <i class="fas fa-phone fa-2x" style="color: var(--primary);"></i>
-                    <p class="mt-2 fw-bold mb-0">Phone</p>
-                    <p class="text-muted">061-******, 98********</p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="p-3">
-                    <i class="fas fa-map-marker-alt fa-2x" style="color: var(--primary);"></i>
-                    <p class="mt-2 fw-bold mb-0">Location</p>
-                    <p class="text-muted">Nepal</p>
+            <div class="contact-item">
+                <span class="contact-item__icon"><i class="fas fa-phone" aria-hidden="true"></i></span>
+                <div>
+                    <span>Phone</span>
+                    <strong>061-******, 98********</strong>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<section id="reviews" class="container my-5">
-    <h2 class="section-title">What Our Customers Say</h2>
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="review-card">
-                <div class="stars mb-2">★★★★★</div>
+<section class="section" id="reviews">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <span class="section-eyebrow">Customer stories</span>
+                <h2 class="section-title">What our customers say</h2>
+            </div>
+        </div>
+        <div class="review-grid">
+            <article class="review-card">
+                <div class="stars" aria-label="5 out of 5 stars">
+                    <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
+                </div>
                 <p class="review-text">"Although I specifically like to eat diet food, I discovered how simple and delicious the food is on this website. Amazing food! I've tried a few and they turned out great."</p>
-                <p class="fw-bold mb-0 mt-3">— Ankit Tiwari</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="review-card">
-                <div class="stars mb-2">★★★★★</div>
+                <div class="review-author">
+                    <span class="review-avatar">AT</span>
+                    <div>
+                        <strong>Ankit Tiwari</strong>
+                        <span>Foodie Express customer</span>
+                    </div>
+                </div>
+            </article>
+            <article class="review-card">
+                <div class="stars" aria-label="5 out of 5 stars">
+                    <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
+                </div>
                 <p class="review-text">"I started making new dishes with the help of the food available. Love the variety and the easy-to-follow experience. Highly recommended for food lovers!"</p>
-                <p class="fw-bold mb-0 mt-3">— Suyesh Poudel</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="review-card">
-                <div class="stars mb-2">★★★★★</div>
+                <div class="review-author">
+                    <span class="review-avatar">SP</span>
+                    <div>
+                        <strong>Suyesh Poudel</strong>
+                        <span>Foodie Express customer</span>
+                    </div>
+                </div>
+            </article>
+            <article class="review-card">
+                <div class="stars" aria-label="5 out of 5 stars">
+                    <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
+                </div>
                 <p class="review-text">"Great website for finding new food to try. After finding food from this website, I started ordering and trying many dishes. Highly recommended!"</p>
-                <p class="fw-bold mb-0 mt-3">— Sandesh Dhakal</p>
-            </div>
+                <div class="review-author">
+                    <span class="review-avatar">SD</span>
+                    <div>
+                        <strong>Sandesh Dhakal</strong>
+                        <span>Foodie Express customer</span>
+                    </div>
+                </div>
+            </article>
         </div>
     </div>
 </section>
-
 {% endblock %}
