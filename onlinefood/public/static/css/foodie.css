@@ -3081,7 +3081,7 @@ textarea.form-control {
     position: absolute;
     inset: 0;
     background-image: linear-gradient(180deg, rgba(23, 20, 18, 0.18), rgba(23, 20, 18, 0.88)),
-        url('../item/chicken-biryani.jpg');
+        url('../item/chicken-biryani.webp');
     background-position: center;
     background-size: cover;
     content: '';
