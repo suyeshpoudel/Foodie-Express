@@ -1,183 +1,163 @@
 {% extends 'base.html' %}
 
+{% block title %}My Profile - Foodie Express{% endblock %}
+
 {% block start %}
-
-<div class="page-header">
+<section class="page-hero">
     <div class="container">
-        <h1><i class="fas fa-user-circle me-2"></i>My Profile</h1>
-        <p>Manage your account information and password</p>
-    </div>
-</div>
-
-<div class="container">
-    <div class="row g-4 align-items-start">
-        <div class="col-lg-8">
-            <div class="row g-4">
-                <div class="col-12">
-                    <div class="card-form">
-                        <div class="card-header">
-                            <h3><i class="fas fa-id-card me-2"></i>Profile Info</h3>
-                        </div>
-                        <div class="card-body">
-                            <form method="POST" action="{% url 'profile' %}" enctype="multipart/form-data">
-                                {% csrf_token %}
-                                <div class="text-center mb-4">
-                                    <div class="position-relative d-inline-block">
-                                        <div style="width: 110px; height: 110px; border-radius: 50%; overflow: hidden; margin: 0 auto; border: 3px solid var(--primary);">
-                                            <img src="{% if profile.avatar %}{{ profile.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ request.user.first_name|default:request.user.username }}&background=e85d04&color=fff&size=110{% endif %}"
-                                                 style="width: 100%; height: 100%; object-fit: cover;">
-                                        </div>
-                                        <label for="avatarInput" class="position-absolute" style="bottom: 2px; right: 2px; width: 32px; height: 32px; background: var(--primary); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                                            <i class="fas fa-camera" style="font-size: 0.7rem;"></i>
-                                        </label>
-                                        <input id="avatarInput" type="file" name="avatar" class="d-none" accept="image/*">
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label-custom">Username</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-user text-muted"></i></span>
-                                        <input type="text" class="form-control form-control-custom" value="{{ request.user.username }}" disabled style="background: #fefce8; border-left: none;">
-                                    </div>
-                                </div>
-                                <div class="row g-2">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label-custom">First Name</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-user text-muted"></i></span>
-                                            <input type="text" name="first_name" class="form-control form-control-custom" value="{{ request.user.first_name }}" style="border-left: none;">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label-custom">Last Name</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-user text-muted"></i></span>
-                                            <input type="text" name="last_name" class="form-control form-control-custom" value="{{ request.user.last_name }}" style="border-left: none;">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label-custom">Email</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-envelope text-muted"></i></span>
-                                        <input type="email" name="email" class="form-control form-control-custom" value="{{ request.user.email }}" style="border-left: none;">
-                                    </div>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="form-label-custom">Phone</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-phone text-muted"></i></span>
-                                        <input type="text" name="phone" class="form-control form-control-custom" value="{{ profile.phone }}" style="border-left: none;">
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary-custom w-100 py-2">
-                                    <i class="fas fa-save me-2"></i> Save Changes
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12">
-                    <div class="card-form">
-                        <div class="card-header">
-                            <h3><i class="fas fa-lock me-2"></i>Change Password</h3>
-                        </div>
-                        <div class="card-body">
-                            <form method="POST" action="{% url 'change_password' %}">
-                                {% csrf_token %}
-                                <div class="mb-3">
-                                    <label class="form-label-custom">Current Password</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-lock text-muted"></i></span>
-                                        <input type="password" name="old_password" class="form-control form-control-custom" required style="border-left: none;">
-                                    </div>
-                                </div>
-                                <div class="row g-2">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label-custom">New Password</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-key text-muted"></i></span>
-                                            <input type="password" name="new_password" class="form-control form-control-custom" required style="border-left: none;">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label-custom">Confirm New Password</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-check-circle text-muted"></i></span>
-                                            <input type="password" name="confirm_password" class="form-control form-control-custom" required style="border-left: none;">
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary-custom w-100 py-2">
-                                    <i class="fas fa-key me-2"></i> Change Password
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="breadcrumb-line">
+            <a href="/">Home</a>
+            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            <span>Account</span>
         </div>
-
-        <div class="col-lg-4 d-flex flex-column gap-4">
-            <div class="p-4 rounded" style="background: #fff; color: #1c1917; box-shadow: var(--card-shadow); border: 1px solid #f0f0f0;">
-                <div class="text-center mb-3">
-                    <div style="width: 72px; height: 72px; border-radius: 50%; overflow: hidden; margin: 0 auto 0.75rem; border: 3px solid var(--primary);">
-                        <img src="{% if profile.avatar %}{{ profile.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ request.user.first_name|default:request.user.username }}&background=ca8a04&color=fff&size=72{% endif %}"
-                             style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
-                    <h5 class="fw-bold mb-0">{{ request.user.get_full_name|default:request.user.username }}</h5>
-                    <p class="small mb-0" style="color: #a8a29e;">{{ request.user.email }}</p>
-                </div>
-                <div class="row g-2">
-                    <div class="col-6">
-                        <div class="p-2 text-center rounded" style="background: #fafaf9;">
-                            <div class="fw-bold fs-5">{{ order_count|default:0 }}</div>
-                            <small style="color: #a8a29e;">Orders</small>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="p-2 text-center rounded" style="background: #fafaf9;">
-                            <div class="fw-bold fs-5" style="color: var(--primary);">NPR {{ total_spent|default:0 }}</div>
-                            <small style="color: #a8a29e;">Spent</small>
-                        </div>
-                    </div>
-                </div>
+        <div class="page-hero-row">
+            <div>
+                <h1 class="page-title">Your account</h1>
+                <p class="page-subtitle">Manage your profile, delivery details, and password.</p>
             </div>
-
-            <div class="p-4 rounded" style="background: #fff; box-shadow: var(--card-shadow);">
-                <h6 class="fw-bold mb-3" style="color: var(--secondary);"><i class="fas fa-link me-2" style="color: var(--primary);"></i>Quick Links</h6>
-                <div class="d-flex flex-column gap-2">
-                    <a href="{% url 'orders' %}" class="d-flex align-items-center gap-2 px-3 py-2 rounded text-decoration-none" style="background: #fff; color: #57534e; font-weight: 500; font-size: 0.85rem; transition: all 0.2s; border: 1px solid #f0f0f0;">
-                        <i class="fas fa-receipt" style="width: 18px; color: var(--primary);"></i> My Orders
-                        <i class="fas fa-chevron-right ms-auto" style="font-size: 0.65rem; color: #d6d3d1;"></i>
-                    </a>
-                    <a href="{% url 'cart' %}" class="d-flex align-items-center gap-2 px-3 py-2 rounded text-decoration-none" style="background: #fff; color: #57534e; font-weight: 500; font-size: 0.85rem; transition: all 0.2s; border: 1px solid #f0f0f0;">
-                        <i class="fas fa-shopping-cart" style="width: 18px; color: var(--primary);"></i> My Cart
-                        <i class="fas fa-chevron-right ms-auto" style="font-size: 0.65rem; color: #d6d3d1;"></i>
-                    </a>
-                    <a href="{% url 'manage_addresses' %}" class="d-flex align-items-center gap-2 px-3 py-2 rounded text-decoration-none" style="background: #fff; color: #57534e; font-weight: 500; font-size: 0.85rem; transition: all 0.2s; border: 1px solid #f0f0f0;">
-                        <i class="fas fa-map-marker-alt" style="width: 18px;"></i> My Addresses
-                        <i class="fas fa-chevron-right ms-auto" style="font-size: 0.65rem;"></i>
-                    </a>
-                    {% if request.user.is_superuser %}
-                    <a href="{% url 'admin_dashboard' %}" class="d-flex align-items-center gap-2 px-3 py-2 rounded text-decoration-none" style="background: #fff; border: 1px solid #f0f0f0; color: #57534e; font-weight: 600; font-size: 0.85rem; transition: all 0.2s;">
-                        <i class="fas fa-chart-bar" style="width: 18px;"></i> Dashboard
-                        <i class="fas fa-chevron-right ms-auto" style="font-size: 0.65rem;"></i>
-                    </a>
-                    {% endif %}
-                </div>
+            <div class="page-actions">
+                <a href="{% url 'orders' %}" class="btn btn-outline btn-sm"><i class="fas fa-receipt" aria-hidden="true"></i> View orders</a>
             </div>
         </div>
     </div>
-</div>
+</section>
 
+<section class="section section-sm">
+    <div class="container">
+        <div class="profile-grid">
+            <aside class="profile-side">
+                <div class="profile-card profile-card__center">
+                    <form method="POST" action="{% url 'profile' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="avatar-wrap">
+                            <span class="avatar">
+                                {% if profile.avatar %}
+                                <img src="{{ profile.avatar.url }}" alt="{{ request.user.get_full_name|default:request.user.username }}">
+                                {% elif request.user.first_name %}
+                                {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+                                {% else %}
+                                {{ request.user.username|first|upper }}
+                                {% endif %}
+                            </span>
+                            <label class="avatar-edit" for="avatarInput" aria-label="Change profile photo">
+                                <i class="fas fa-camera" aria-hidden="true"></i>
+                            </label>
+                            <input id="avatarInput" type="file" name="avatar" class="d-none" accept="image/*">
+                        </div>
+                    </form>
+                    <h2 class="profile-name">{{ request.user.get_full_name|default:request.user.username }}</h2>
+                    <p class="profile-email">{% if request.user.email %}{{ request.user.email }}{% else %}@{{ request.user.username }}{% endif %}</p>
+                    <div class="stat-grid">
+                        <div class="stat-box">
+                            <strong>{{ order_count|default:0 }}</strong>
+                            <span>Orders placed</span>
+                        </div>
+                        <div class="stat-box">
+                            <strong>NPR {{ total_spent|default:0 }}</strong>
+                            <span>Total spent</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card">
+                    <nav class="quick-links" aria-label="Account links">
+                        <a href="{% url 'orders' %}" class="quick-link"><i class="fas fa-receipt" aria-hidden="true"></i> My orders <i class="fas fa-chevron-right chevron" aria-hidden="true"></i></a>
+                        <a href="{% url 'cart' %}" class="quick-link"><i class="fas fa-bag-shopping" aria-hidden="true"></i> My cart <i class="fas fa-chevron-right chevron" aria-hidden="true"></i></a>
+                        <a href="{% url 'manage_addresses' %}" class="quick-link"><i class="fas fa-location-dot" aria-hidden="true"></i> Delivery addresses <i class="fas fa-chevron-right chevron" aria-hidden="true"></i></a>
+                        {% if request.user.is_superuser %}
+                        <a href="{% url 'admin_dashboard' %}" class="quick-link"><i class="fas fa-chart-line" aria-hidden="true"></i> Dashboard <i class="fas fa-chevron-right chevron" aria-hidden="true"></i></a>
+                        {% endif %}
+                    </nav>
+                </div>
+            </aside>
+
+            <div class="profile-forms">
+                <section class="profile-card">
+                    <div class="form-section-head">
+                        <h3><i class="fas fa-id-card" aria-hidden="true"></i> Profile information</h3>
+                        <p>Keep your contact details up to date for smoother deliveries.</p>
+                    </div>
+                    <form method="POST" action="{% url 'profile' %}" class="auth-form">
+                        {% csrf_token %}
+                        <div>
+                            <label for="profileUsername" class="form-label">Username</label>
+                            <input type="text" id="profileUsername" class="form-control" value="{{ request.user.username }}" disabled>
+                            <div class="field-hint">Your username cannot be changed.</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <label for="profileFirstName" class="form-label">First name</label>
+                                <input type="text" id="profileFirstName" name="first_name" class="form-control" value="{{ request.user.first_name }}" autocomplete="given-name">
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="profileLastName" class="form-label">Last name</label>
+                                <input type="text" id="profileLastName" name="last_name" class="form-control" value="{{ request.user.last_name }}" autocomplete="family-name">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <label for="profileEmail" class="form-label">Email</label>
+                                <input type="email" id="profileEmail" name="email" class="form-control" value="{{ request.user.email }}" autocomplete="email">
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="profilePhone" class="form-label">Phone</label>
+                                <input type="tel" id="profilePhone" name="phone" class="form-control" value="{{ profile.phone|default:'' }}" autocomplete="tel">
+                            </div>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-brand"><i class="fas fa-check" aria-hidden="true"></i> Save changes</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="profile-card">
+                    <div class="form-section-head">
+                        <h3><i class="fas fa-lock" aria-hidden="true"></i> Change password</h3>
+                        <p>Choose a new password for your account.</p>
+                    </div>
+                    <form method="POST" action="{% url 'change_password' %}" class="auth-form">
+                        {% csrf_token %}
+                        <div>
+                            <label for="oldPassword" class="form-label">Current password</label>
+                            <div class="password-wrap">
+                                <input type="password" id="oldPassword" name="old_password" class="form-control" autocomplete="current-password" required>
+                                <button type="button" class="password-toggle" data-password-toggle="oldPassword" aria-label="Show current password">Show</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <label for="newPassword" class="form-label">New password</label>
+                                <div class="password-wrap">
+                                    <input type="password" id="newPassword" name="new_password" class="form-control" autocomplete="new-password" required>
+                                    <button type="button" class="password-toggle" data-password-toggle="newPassword" aria-label="Show new password">Show</button>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="confirmPassword" class="form-label">Confirm password</label>
+                                <div class="password-wrap">
+                                    <input type="password" id="confirmPassword" name="confirm_password" class="form-control" autocomplete="new-password" required>
+                                    <button type="button" class="password-toggle" data-password-toggle="confirmPassword" aria-label="Show confirmation password">Show</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field-hint">You will be asked to sign in again after changing your password.</div>
+                        <div>
+                            <button type="submit" class="btn btn-outline"><i class="fas fa-key" aria-hidden="true"></i> Update password</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
 <script>
-    document.getElementById('avatarInput')?.addEventListener('change', function(e) {
-        if (e.target.files.length) {
-            e.target.closest('form').submit();
+    document.getElementById('avatarInput')?.addEventListener('change', function (event) {
+        if (event.target.files.length) {
+            event.target.closest('form').submit();
         }
     });
 </script>
-
 {% endblock %}

@@ -1,59 +1,61 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login - Foodie Express{% endblock %}
 
 {% block start %}
-
-<div class="page-header">
+<section class="auth-wrap">
     <div class="container">
-        <h1><i class="fas fa-sign-in-alt me-2"></i>Welcome Back</h1>
-        <p>Sign in to your account to continue</p>
-    </div>
-</div>
-
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card-form">
-                <div class="card-header text-center">
-                    <i class="fas fa-user-circle fa-3x mb-2" style="opacity: 0.8;"></i>
-                    <h3>Login</h3>
+        <div class="auth-shell">
+            <aside class="auth-aside">
+                <a class="auth-aside__brand" href="/">
+                    <img src="{% static 'rm.png' %}" alt="" width="42" height="42">
+                    <span>
+                        <strong>Foodie Express</strong>
+                        <span>Food, delivered</span>
+                    </span>
+                </a>
+                <div class="auth-aside__copy">
+                    <h2>Good food is a login away.</h2>
+                    <p>Sign in to pick up where you left off, reorder your favorites, and follow every order to your door.</p>
                 </div>
-                <div class="card-body">
-                    {% if messages %}
-                    {% for message in messages %}
-                    <div class="alert alert-custom alert-{% if message.tags == 'error' %}danger{% else %}info{% endif %} d-flex align-items-center">
-                        <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
-                        {{ message }}
+                <ul class="auth-aside__points">
+                    <li><i class="fas fa-check" aria-hidden="true"></i> 57 dishes across 7 cuisines</li>
+                    <li><i class="fas fa-check" aria-hidden="true"></i> Live order status updates</li>
+                    <li><i class="fas fa-check" aria-hidden="true"></i> Secure checkout with eSewa</li>
+                </ul>
+            </aside>
+            <div class="auth-main">
+                <div class="auth-card">
+                    <div class="auth-card__head">
+                        <h1>Welcome back</h1>
+                        <p>Sign in to your account to continue ordering.</p>
                     </div>
-                    {% endfor %}
-                    {% endif %}
-
-                    <form method="post">
+                    <form method="post" class="auth-form">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="username" class="form-label-custom">Username</label>
-                            <div class="input-group">
-                                <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-user text-muted"></i></span>
-                                <input type="text" class="form-control form-control-custom" name="username" id="username" placeholder="Enter your username" required style="border-left: none;">
+                        {% if request.GET.next %}
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
+                        {% endif %}
+                        <div>
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" name="username" id="username" placeholder="Enter your username" autocomplete="username" required autofocus>
+                        </div>
+                        <div>
+                            <label for="password" class="form-label">Password</label>
+                            <div class="password-wrap">
+                                <input type="password" class="form-control" name="password" id="password" placeholder="Enter your password" autocomplete="current-password" required>
+                                <button type="button" class="password-toggle" data-password-toggle="password" aria-label="Show password">Show</button>
                             </div>
                         </div>
-                        <div class="mb-4">
-                            <label for="password" class="form-label-custom">Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-lock text-muted"></i></span>
-                                <input type="password" class="form-control form-control-custom" name="password" id="password" placeholder="Enter your password" required style="border-left: none;">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-3">
-                            <i class="fas fa-sign-in-alt me-2"></i> Login
+                        <button type="submit" class="btn btn-brand btn-lg w-100">
+                            <i class="fas fa-arrow-right-to-bracket" aria-hidden="true"></i> Sign in
                         </button>
-                        <p class="text-center text-muted mb-0">
-                            Don't have an account? <a href="/register/" class="text-decoration-none fw-semibold" style="color: var(--primary);">Register</a>
-                        </p>
                     </form>
+                    <p class="auth-switch">New to Foodie Express? <a href="/register/">Create an account</a></p>
+                    <p class="auth-terms">Your cart, saved favorites, and order history stay linked to your account.</p>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
+</section>
 {% endblock %}

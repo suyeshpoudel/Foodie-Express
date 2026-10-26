@@ -1,113 +1,134 @@
 {% extends 'base.html' %}
 
+{% block title %}Delivery Addresses - Foodie Express{% endblock %}
+
 {% block start %}
-
-<div class="page-header">
+<section class="page-hero">
     <div class="container">
-        <h1><i class="fas fa-address-book me-2"></i>Manage Addresses</h1>
-        <p>Add, edit, or remove your delivery addresses</p>
-    </div>
-</div>
-
-<div class="container">
-    <div class="row">
-        <div class="col-lg-7">
-            {% if addresses %}
-            {% for address in addresses %}
-            <div class="card-food p-3 mb-3">
-                <div class="d-flex align-items-start justify-content-between">
-                    <div>
-                        <div class="fw-semibold">{{ address.full_name }}</div>
-                        <small class="text-muted d-block">{{ address.street }}, {{ address.city }}{% if address.zip_code %} - {{ address.zip_code }}{% endif %}</small>
-                        <small class="text-muted d-block"><i class="fas fa-phone me-1"></i>{{ address.phone }}</small>
-                        {% if address.zone %}<span class="badge bg-info text-dark mt-1" style="font-size: 0.65rem;">{{ address.zone.name }}</span>{% endif %}
-                        {% if address.is_default %}
-                        <span class="badge bg-primary mt-1" style="font-size: 0.65rem;">Default</span>
-                        {% endif %}
-                    </div>
-                    <div class="d-flex gap-1">
-                        {% if not address.is_default %}
-                        <form method="POST" action="{% url 'manage_addresses' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="set_default">
-                            <input type="hidden" name="address_uid" value="{{ address.uid }}">
-                            <button type="submit" class="btn btn-sm btn-outline-primary" style="border-radius: 8px;" title="Set as default">
-                                <i class="fas fa-star"></i>
-                            </button>
-                        </form>
-                        {% endif %}
-                        <form method="POST" action="{% url 'manage_addresses' %}" onsubmit="return confirm('Delete this address?')">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="address_uid" value="{{ address.uid }}">
-                            <button type="submit" class="btn btn-sm btn-danger-custom" title="Delete">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-            {% else %}
-            <div class="empty-state">
-                <i class="fas fa-map-marker-alt"></i>
-                <h4>No addresses saved</h4>
-                <p>Add a delivery address to make checkout faster.</p>
-            </div>
-            {% endif %}
+        <div class="breadcrumb-line">
+            <a href="/">Home</a>
+            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            <a href="{% url 'cart' %}">Cart</a>
+            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            <span>Addresses</span>
         </div>
+        <div class="page-hero-row">
+            <div>
+                <h1 class="page-title">Delivery addresses</h1>
+                <p class="page-subtitle">Keep the places you order to up to date for a faster checkout.</p>
+            </div>
+            <div class="page-actions">
+                <a href="{% url 'cart' %}" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to cart</a>
+            </div>
+        </div>
+    </div>
+</section>
 
-        <div class="col-lg-5">
-            <div class="card-form">
-                <div class="card-header">
-                    <h3><i class="fas fa-plus-circle me-2"></i>Add New Address</h3>
+<section class="section section-sm">
+    <div class="container">
+        <div class="address-layout">
+            <section class="panel">
+                <div class="panel-head">
+                    <div>
+                        <h2 class="panel-title"><i class="fas fa-location-dot" aria-hidden="true"></i> Saved addresses</h2>
+                        <p class="panel-subtitle">{{ addresses|length }} address{{ addresses|length|pluralize:"es" }} on your account</p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form method="POST" action="{% url 'add_address' %}">
+                <div class="panel-body">
+                    {% if addresses %}
+                    {% for address in addresses %}
+                    <div class="address-manage-card">
+                        <div class="address-card__main">
+                            <div class="address-card__name">{{ address.full_name }}</div>
+                            <div class="address-card__line">{{ address.street }}, {{ address.city }}{% if address.zip_code %} - {{ address.zip_code }}{% endif %}</div>
+                            <div class="address-card__phone"><i class="fas fa-phone" aria-hidden="true"></i>{{ address.phone }}</div>
+                            <div class="address-card__badges">
+                                {% if address.zone %}<span class="badge-soft badge-zone"><i class="fas fa-clock" aria-hidden="true"></i>{{ address.zone.name }} &middot; ~{{ address.zone.delivery_time }} min</span>{% endif %}
+                                {% if address.is_default %}<span class="badge-soft badge-default">Default address</span>{% endif %}
+                            </div>
+                        </div>
+                        <div class="address-manage-card__actions">
+                            {% if not address.is_default %}
+                            <form method="POST" action="{% url 'manage_addresses' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="set_default">
+                                <input type="hidden" name="address_uid" value="{{ address.uid }}">
+                                <button type="submit" class="btn btn-outline btn-sm" aria-label="Set {{ address.full_name }} as default address" title="Set as default">
+                                    <i class="fas fa-star" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                            <form method="POST" action="{% url 'manage_addresses' %}" onsubmit="return confirm('Delete this address?')">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="address_uid" value="{{ address.uid }}">
+                                <button type="submit" class="btn btn-danger btn-sm" aria-label="Delete {{ address.full_name }}'s address" title="Delete">
+                                    <i class="fas fa-trash" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="empty-state">
+                        <span class="empty-icon"><i class="fas fa-location-dot" aria-hidden="true"></i></span>
+                        <h2>No addresses yet</h2>
+                        <p>Add your first delivery address using the form on the right.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <div>
+                        <h2 class="panel-title"><i class="fas fa-plus" aria-hidden="true"></i> Add an address</h2>
+                        <p class="panel-subtitle">We will save it to your account for next time.</p>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <form method="POST" action="{% url 'add_address' %}" class="auth-form">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label-custom">Full Name</label>
-                            <input type="text" name="full_name" class="form-control form-control-custom" required>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <label for="addressFullName" class="form-label">Full name</label>
+                                <input type="text" id="addressFullName" name="full_name" class="form-control" autocomplete="name" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="addressPhone" class="form-label">Phone</label>
+                                <input type="tel" id="addressPhone" name="phone" class="form-control" autocomplete="tel" required>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label-custom">Phone</label>
-                            <input type="text" name="phone" class="form-control form-control-custom" required>
+                        <div>
+                            <label for="addressStreet" class="form-label">Street</label>
+                            <input type="text" id="addressStreet" name="street" class="form-control" autocomplete="street-address" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label-custom">Street</label>
-                            <input type="text" name="street" class="form-control form-control-custom" required>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <label for="addressCity" class="form-label">City</label>
+                                <input type="text" id="addressCity" name="city" class="form-control" autocomplete="address-level2" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="addressZip" class="form-label">Zip code</label>
+                                <input type="text" id="addressZip" name="zip_code" class="form-control" autocomplete="postal-code">
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label-custom">City</label>
-                            <input type="text" name="city" class="form-control form-control-custom" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label-custom">Zip Code</label>
-                            <input type="text" name="zip_code" class="form-control form-control-custom">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label-custom">Delivery Zone</label>
-                            <select name="zone" class="form-control form-control-custom">
-                                <option value="">Select zone</option>
+                        <div>
+                            <label for="addressZone" class="form-label">Delivery zone</label>
+                            <select id="addressZone" name="zone" class="form-select">
+                                <option value="">Select a zone</option>
                                 {% for zone in zones %}
                                 <option value="{{ zone.uid }}">{{ zone.name }} (~{{ zone.delivery_time }} min)</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary-custom w-100">
-                            <i class="fas fa-save me-2"></i> Save Address
-                        </button>
+                        <div>
+                            <button type="submit" class="btn btn-brand"><i class="fas fa-check" aria-hidden="true"></i> Save address</button>
+                        </div>
                     </form>
                 </div>
-            </div>
+            </section>
         </div>
     </div>
-
-    <div class="text-center mt-4">
-        <a href="/cart/" class="btn btn-outline-primary" style="border-radius: 8px;">
-            <i class="fas fa-arrow-left me-1"></i> Back to Cart
-        </a>
-    </div>
-</div>
-
+</section>
 {% endblock %}

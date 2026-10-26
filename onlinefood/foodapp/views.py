@@ -22,6 +22,7 @@ from django.core.paginator import Paginator
 from django.db.models import Avg, Sum, Count, F, Max
 from django.db.models.functions import TruncDate
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.conf import settings
 
 # Create your views here.
@@ -55,21 +56,23 @@ def home(request):
 
 def login_page(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
 
-        if not User.objects.filter(username=username).exists():
-            messages.error(request, "Invalid Username.")
-            return redirect('/')
-        
-        user = authenticate(username = username, password = password)
-
+        user = authenticate(request, username=username, password=password)
         if user is None:
-            messages.error(request, "Invalid Password")
-            return redirect('/')
-        else:
-            login(request, user)
-            return redirect('/')
+            messages.error(request, "Invalid username or password.")
+            return redirect('/login/')
+
+        login(request, user)
+        next_url = request.POST.get('next') or request.GET.get('next')
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            return redirect(next_url)
+        return redirect('/')
     return render(request, 'login.html')
 
 def logout_page(request):
@@ -83,22 +86,23 @@ def register(request):
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        user = User.objects.filter(username = username)
+        if not all([first_name, last_name, username, password]):
+            messages.error(request, "Please fill in all fields.")
+            return redirect('/register/')
 
-        if user.exists():
-            messages.info(request, "Username already taken.")
-            return redirect("/register/") 
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "That username is already taken.")
+            return redirect('/register/')
 
         user = User.objects.create(
-            first_name= first_name, 
-            last_name= last_name,
-            username= username, 
+            first_name=first_name,
+            last_name=last_name,
+            username=username,
         )
-
         user.set_password(password)
         user.save()
-        messages.info(request, "Account created successfully")
-        return redirect("/register/")
+        messages.success(request, "Account created successfully. Please sign in.")
+        return redirect('/login/')
 
     return render(request, "register.html")
     
@@ -805,7 +809,7 @@ def profile(request):
     order_count = Cart.objects.filter(user=request.user, is_paid=True).count()
     total_spent = CartItems.objects.filter(
         cart__user=request.user, cart__is_paid=True
-    ).aggregate(total=Sum('item__price'))['total'] or 0
+    ).aggregate(total=Sum(F('item__price') * F('quantity')))['total'] or 0
 
     context = {
         'profile': profile,
@@ -836,7 +840,8 @@ def change_password(request):
 
     request.user.set_password(new_password)
     request.user.save()
-    messages.success(request, "Password changed successfully. Please login again.")
+    logout(request)
+    messages.success(request, "Password changed successfully. Please sign in again.")
     return redirect('/login/')
 
 

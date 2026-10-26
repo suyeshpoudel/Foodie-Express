@@ -1,69 +1,93 @@
 {% extends "base.html" %}
 
+{% block title %}Edit {{ item.item_name }} - Foodie Express{% endblock %}
+
 {% block start %}
-
-<div class="page-header">
+<section class="page-hero">
     <div class="container">
-        <h1><i class="fas fa-edit me-2"></i>Update Item</h1>
-        <p>Edit menu item details</p>
-    </div>
-</div>
-
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card-form">
-                <div class="card-header text-center">
-                    <i class="fas fa-edit fa-3x mb-2" style="opacity: 0.8;"></i>
-                    <h3>{{ item.item_name }}</h3>
-                </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="item_name" class="form-label-custom">Item Name</label>
-                            <input name="item_name" value="{{ item.item_name }}" required type="text" class="form-control form-control-custom">
-                        </div>
-                        <div class="mb-3">
-                            <label for="description" class="form-label-custom">Description</label>
-                            <textarea name="description" required class="form-control form-control-custom" rows="3">{{ item.description }}</textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="category" class="form-label-custom">Category</label>
-                            <select name="category" id="category" class="form-control form-control-custom" required>
-                                <option value="">Select a category</option>
-                                {% for cat in categories %}
-                                <option value="{{ cat.uid }}" {% if item.category and item.category.uid == cat.uid %}selected{% endif %}>
-                                    {{ cat.category_name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="price" class="form-label-custom">Price (NPR)</label>
-                                <input name="price" value="{{ item.price }}" required type="number" class="form-control form-control-custom">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="prep_time" class="form-label-custom">Prep Time (min)</label>
-                                <input name="prep_time" value="{{ item.prep_time }}" type="number" class="form-control form-control-custom" min="1">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="image" class="form-label-custom">Image</label>
-                                <input name="image" type="file" class="form-control form-control-custom">
-                                {% if item.image %}
-                                <small class="text-muted">Leave empty to keep current image</small>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary-custom w-100 py-2">
-                            <i class="fas fa-save me-2"></i> Update Item
-                        </button>
-                    </form>
-                </div>
+        <div class="breadcrumb-line">
+            <a href="/">Home</a>
+            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            <a href="/all-items/">Menu</a>
+            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            <span>Edit item</span>
+        </div>
+        <div class="page-hero-row">
+            <div>
+                <h1 class="page-title">Edit menu item</h1>
+                <p class="page-subtitle">Update the details for {{ item.item_name }}.</p>
+            </div>
+            <div class="page-actions">
+                <a href="/all-items/" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to menu</a>
             </div>
         </div>
     </div>
-</div>
+</section>
 
+<section class="section section-sm">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-7">
+                <section class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2 class="panel-title"><i class="fas fa-pen" aria-hidden="true"></i> {{ item.item_name }}</h2>
+                            <p class="panel-subtitle">Changes will appear on the menu immediately.</p>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <form method="post" enctype="multipart/form-data" class="auth-form">
+                            {% csrf_token %}
+                            <div>
+                                <label for="item_name" class="form-label">Item name</label>
+                                <input name="item_name" id="item_name" value="{{ item.item_name }}" required maxlength="100" type="text" class="form-control">
+                            </div>
+                            <div>
+                                <label for="description" class="form-label">Description</label>
+                                <textarea name="description" id="description" required maxlength="500" class="form-control" rows="3">{{ item.description }}</textarea>
+                            </div>
+                            <div>
+                                <label for="category" class="form-label">Category</label>
+                                <select name="category" id="category" class="form-select" required>
+                                    <option value="">Select a category</option>
+                                    {% for cat in categories %}
+                                    <option value="{{ cat.uid }}" {% if item.category and item.category.uid == cat.uid %}selected{% endif %}>{{ cat.category_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <label for="price" class="form-label">Price (NPR)</label>
+                                    <input name="price" id="price" value="{{ item.price }}" required min="1" type="number" class="form-control">
+                                </div>
+                                <div class="col-sm-4">
+                                    <label for="prep_time" class="form-label">Prep time (min)</label>
+                                    <input name="prep_time" id="prep_time" value="{{ item.prep_time }}" type="number" class="form-control" min="1">
+                                </div>
+                                <div class="col-sm-4">
+                                    <label for="image" class="form-label">Replace image</label>
+                                    <input name="image" id="image" type="file" class="form-control" accept="image/*">
+                                    {% if item.image %}<div class="field-hint">Leave empty to keep the current image.</div>{% endif %}
+                                </div>
+                            </div>
+                            {% if item.image %}
+                            <div class="form-image-preview">
+                                <img src="{{ item.image.url }}" alt="{{ item.item_name }}">
+                                <div>
+                                    <strong>Current image</strong>
+                                    <span>Upload a new file above to replace it.</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="d-flex gap-2 flex-wrap pt-1">
+                                <button type="submit" class="btn btn-brand"><i class="fas fa-check" aria-hidden="true"></i> Save changes</button>
+                                <a href="/all-items/" class="btn btn-outline">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

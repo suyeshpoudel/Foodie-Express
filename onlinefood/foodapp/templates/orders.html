@@ -1,64 +1,82 @@
 {% extends 'base.html' %}
 
+{% block title %}My Orders - Foodie Express{% endblock %}
+
 {% block start %}
-
-<div class="page-header">
+<section class="page-hero">
     <div class="container">
-        <h1><i class="fas fa-receipt me-2"></i>My Orders</h1>
-        <p>Track all your orders in real time</p>
+        <div class="breadcrumb-line">
+            <a href="/">Home</a>
+            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            <span>Orders</span>
+        </div>
+        <div class="page-hero-row">
+            <div>
+                <h1 class="page-title">Your orders</h1>
+                <p class="page-subtitle">Follow your food from the kitchen to your doorstep.</p>
+            </div>
+            <div class="page-actions">
+                <a href="/all-items/" class="btn btn-brand btn-sm"><i class="fas fa-plus" aria-hidden="true"></i> Order again</a>
+            </div>
+        </div>
     </div>
-</div>
+</section>
 
-<div class="container" id="orders-container">
-    {% if orders %}
-    {% for order in orders %}
-    {% include '_order_card.html' %}
-    {% endfor %}
-    {% else %}
-    <div class="empty-state">
-        <i class="fas fa-receipt"></i>
-        <h4>No orders yet</h4>
-        <p>You haven't placed any orders yet. Browse our menu and place your first order!</p>
-        <a href="/all-items/" class="btn btn-primary-custom"><i class="fas fa-utensils me-2"></i> Browse Menu</a>
+<section class="section section-sm">
+    <div class="container">
+        <div id="orders-container" class="orders-list">
+            {% if orders %}
+            {% for order in orders %}
+            {% include '_order_card.html' %}
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <span class="empty-icon"><i class="fas fa-receipt" aria-hidden="true"></i></span>
+                <h2>No orders yet</h2>
+                <p>When you place an order, it will appear here with live status updates.</p>
+                <a href="/all-items/" class="btn btn-brand"><i class="fas fa-utensils" aria-hidden="true"></i> Browse the menu</a>
+            </div>
+            {% endif %}
+        </div>
     </div>
-    {% endif %}
-</div>
+</section>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-(function() {
-    if (!('Notification' in window)) return;
+(function () {
+    var statuses = {};
+    document.querySelectorAll('[id^="order-"]').forEach(function (card) {
+        statuses[card.id] = card.getAttribute('data-status');
+    });
 
-    if (Notification.permission === 'default') {
+    if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
     }
 
-    document.addEventListener('htmx:afterSwap', function(e) {
-        var target = e.detail.target;
-        var oldStatus = target ? target.getAttribute('data-status') : null;
-        var uid = target ? target.id?.replace('order-', '') : null;
-        if (!uid || !oldStatus) return;
+    document.body.addEventListener('htmx:afterSwap', function (event) {
+        var card = event.detail.target;
+        if (!card || !card.id || card.id.indexOf('order-') !== 0) return;
 
-        var newCard = document.getElementById('order-' + uid);
-        if (!newCard) return;
-
-        var newStatus = newCard.getAttribute('data-status');
-        if (!newStatus || oldStatus === newStatus) return;
-
-        if (Notification.permission !== 'granted') return;
+        var previous = statuses[card.id];
+        var current = card.getAttribute('data-status');
+        statuses[card.id] = current;
+        if (!previous || previous === current || Notification.permission !== 'granted') return;
 
         var labels = {
-            'Accepted': 'Order Accepted', 'Packed': 'Order Packed',
-            'On the way': 'Out for Delivery', 'Delivered': 'Delivered',
+            'Accepted': 'Order accepted',
+            'Packed': 'Order packed',
+            'On the way': 'Out for delivery',
+            'Delivered': 'Delivered',
             'Cancel': 'Cancelled'
         };
-        var label = labels[newStatus] || newStatus;
+        var orderId = card.id.replace('order-', '').slice(0, 8);
         try {
-            var n = new Notification('Foodie Express - Order #' + uid.slice(0, 8), {
-                body: 'Your order is now: ' + label,
-                icon: 'https://cdn-icons-png.flaticon.com/512/1046/1046857.png',
+            var notification = new Notification('Foodie Express - Order #' + orderId, {
+                body: 'Your order is now: ' + (labels[current] || current)
             });
-            setTimeout(function() { n.close(); }, 6000);
-        } catch(e) {}
+            setTimeout(function () { notification.close(); }, 6000);
+        } catch (error) {}
     });
 })();
 </script>

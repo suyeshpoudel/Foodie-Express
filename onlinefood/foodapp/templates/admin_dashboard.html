@@ -1,181 +1,170 @@
 {% extends 'base.html' %}
 
+{% block title %}Admin Dashboard - Foodie Express{% endblock %}
+
 {% block start %}
-
-<div class="page-header">
+<section class="page-hero">
     <div class="container">
-        <h1><i class="fas fa-chart-line me-2"></i>Admin Dashboard</h1>
-        <p>Overview of orders, revenue, and popular items</p>
-    </div>
-</div>
-
-<div class="container">
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-3">
-            <div class="card-food p-3 text-center" style="height: 100%;">
-                <div class="text-muted small text-uppercase fw-semibold">Orders Today</div>
-                <div class="fw-bold fs-3" style="color: var(--primary);">{{ today_count }}</div>
-            </div>
+        <div class="breadcrumb-line">
+            <a href="/">Home</a>
+            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            <span>Dashboard</span>
         </div>
-        <div class="col-6 col-lg-3">
-            <div class="card-food p-3 text-center" style="height: 100%;">
-                <div class="text-muted small text-uppercase fw-semibold">Revenue Today</div>
-                <div class="fw-bold fs-3" style="color: var(--success);">NPR {{ today_revenue }}</div>
+        <div class="page-hero-row">
+            <div>
+                <h1 class="page-title">Dashboard</h1>
+                <p class="page-subtitle">Orders, revenue, and the dishes customers are loving.</p>
             </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="card-food p-3 text-center" style="height: 100%;">
-                <div class="text-muted small text-uppercase fw-semibold">Total Revenue</div>
-                <div class="fw-bold fs-3" style="color: var(--primary);">NPR {{ total_revenue }}</div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="card-food p-3 text-center" style="height: 100%;">
-                <div class="text-muted small text-uppercase fw-semibold">Total Orders</div>
-                <div class="fw-bold fs-3" style="color: var(--secondary);">{{ total_orders }}</div>
+            <div class="page-actions">
+                <a href="{% url 'all_orders' %}" class="btn btn-outline btn-sm"><i class="fas fa-clipboard-list" aria-hidden="true"></i> All orders</a>
+                <a href="{% url 'add_item' %}" class="btn btn-brand btn-sm"><i class="fas fa-plus" aria-hidden="true"></i> Add item</a>
             </div>
         </div>
     </div>
+</section>
 
-    <div class="row g-4 mb-4">
-        <div class="col-lg-8">
-            <div class="card-food p-4">
-                <h5 class="fw-bold mb-3" style="color: var(--secondary);">
-                    <i class="fas fa-chart-bar me-2" style="color: var(--primary);"></i>Orders & Revenue (Last 7 Days)
-                </h5>
-                <canvas id="ordersChart" height="200"></canvas>
+<section class="section section-sm">
+    <div class="container">
+        <div class="admin-stats">
+            <div class="admin-stat">
+                <div class="admin-stat__label"><i class="fas fa-receipt" aria-hidden="true"></i> Orders today</div>
+                <div class="admin-stat__value">{{ today_count }}</div>
+            </div>
+            <div class="admin-stat">
+                <div class="admin-stat__label"><i class="fas fa-coins" aria-hidden="true"></i> Revenue today</div>
+                <div class="admin-stat__value admin-stat__value--brand">NPR {{ today_revenue }}</div>
+            </div>
+            <div class="admin-stat">
+                <div class="admin-stat__label"><i class="fas fa-chart-line" aria-hidden="true"></i> Total revenue</div>
+                <div class="admin-stat__value admin-stat__value--success">NPR {{ total_revenue }}</div>
+            </div>
+            <div class="admin-stat">
+                <div class="admin-stat__label"><i class="fas fa-bag-shopping" aria-hidden="true"></i> Total orders</div>
+                <div class="admin-stat__value">{{ total_orders }}</div>
             </div>
         </div>
-        <div class="col-lg-4">
-            <div class="card-food p-4">
-                <h5 class="fw-bold mb-3" style="color: var(--secondary);">
-                    <i class="fas fa-chart-pie me-2" style="color: var(--primary);"></i>Order Status
-                </h5>
-                <canvas id="statusChart" height="200"></canvas>
-            </div>
-        </div>
-    </div>
 
-    <div class="row g-4 mb-4">
-        <div class="col-lg-5">
-            <div class="card-food p-4">
-                <h5 class="fw-bold mb-3" style="color: var(--secondary);">
-                    <i class="fas fa-fire me-2" style="color: var(--primary);"></i>Popular Items
-                </h5>
+        <div class="admin-grid">
+            <section class="chart-panel">
+                <div class="chart-panel__head">
+                    <h2><i class="fas fa-chart-column" aria-hidden="true"></i> Orders and revenue</h2>
+                    <span class="badge-soft">Last 7 days</span>
+                </div>
+                <canvas id="ordersChart" height="205" aria-label="Orders and revenue for the last 7 days" role="img"></canvas>
+            </section>
+            <section class="chart-panel">
+                <div class="chart-panel__head">
+                    <h2><i class="fas fa-chart-pie" aria-hidden="true"></i> Order status</h2>
+                </div>
+                <canvas id="statusChart" height="205" aria-label="Orders by status" role="img"></canvas>
+            </section>
+        </div>
+
+        <div class="admin-grid admin-grid--popular">
+            <section class="chart-panel">
+                <div class="chart-panel__head">
+                    <h2><i class="fas fa-fire" aria-hidden="true"></i> Popular items</h2>
+                </div>
                 {% if popular %}
-                <div class="list-group list-group-flush">
+                <div class="popular-list">
                     {% for item in popular %}
-                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 border-0">
-                        <span class="fw-semibold small">{{ item.item__item_name }}</span>
-                        <span class="badge bg-dark rounded-pill">{{ item.total_qty }} sold</span>
+                    <div class="popular-item">
+                        <span class="popular-item__name">{{ item.item__item_name }}</span>
+                        <span class="popular-item__count">{{ item.total_qty }} sold</span>
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                <div class="text-center py-3">
-                    <i class="fas fa-box-open" style="font-size: 2rem; color: #ddd;"></i>
-                    <p class="text-muted small mt-2 mb-0">No items sold yet.</p>
+                <div class="empty-state py-4">
+                    <span class="empty-icon"><i class="fas fa-box-open" aria-hidden="true"></i></span>
+                    <p>No items sold yet.</p>
                 </div>
                 {% endif %}
-            </div>
-        </div>
-        <div class="col-lg-7">
-            <div class="card-food p-4">
-                <h5 class="fw-bold mb-3" style="color: var(--secondary);">
-                    <i class="fas fa-clock me-2" style="color: var(--primary);"></i>Recent Orders
-                </h5>
-                {% if orders %}
-                <div class="table-responsive">
-                    <table class="table table-modern mb-0" style="font-size: 0.8rem;">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Customer</th>
-                                <th>Items</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for order in orders %}
-                            <tr>
-                                <th scope="row" class="fw-bold">{{ forloop.counter }}</th>
-                                <td>
-                                    <div class="fw-semibold">{{ order.user.get_full_name|default:order.user.username }}</div>
-                                </td>
-                                <td>
-                                    <ul class="list-unstyled mb-0">
-                                        {% for cart_item in order.cart_item.all|slice:":2" %}
-                                        <li><span class="small">{{ cart_item.quantity }}x {{ cart_item.item.item_name }}</span></li>
-                                        {% endfor %}
-                                        {% if order.cart_item.count > 2 %}<li class="text-muted" style="font-size: 0.65rem;">+{{ order.cart_item.count|add:"-2" }} more</li>{% endif %}
-                                    </ul>
-                                </td>
-                                <td class="fw-bold" style="color: var(--primary);">NPR {{ order.get_cart_total }}</td>
-                                <td>
-                                    <span class="badge bg-{% if order.status == 'Delivered' %}success{% elif order.status == 'Cancel' %}danger{% elif order.status == 'Accepted' %}info{% elif order.status == 'Packed' %}warning text-dark{% elif order.status == 'On the way' %}primary{% else %}secondary{% endif %}" style="font-size: 0.65rem;">
-                                        {{ order.status }}
-                                    </span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            </section>
+
+            <section class="chart-panel">
+                <div class="chart-panel__head">
+                    <h2><i class="fas fa-clock" aria-hidden="true"></i> Recent orders</h2>
+                    <a href="{% url 'all_orders' %}" class="section-link">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                 </div>
-                <div class="d-flex justify-content-between mt-2">
-                    <a href="{% url 'export_orders_csv' %}" class="small text-decoration-none" style="color: var(--success);">
-                        <i class="fas fa-file-csv me-1"></i> Export CSV
-                    </a>
-                    <a href="/all-orders/" class="small text-decoration-none">View all orders <i class="fas fa-arrow-right ms-1"></i></a>
+                {% if orders %}
+                <div class="recent-orders">
+                    {% for order in orders %}
+                    <div class="recent-order">
+                        <div class="recent-order__name">{{ order.user.get_full_name|default:order.user.username }}</div>
+                        <div class="recent-order__items">
+                            {% for cart_item in order.cart_item.all|slice:":2" %}{{ cart_item.quantity }}x {{ cart_item.item.item_name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if order.cart_item.count > 2 %} +{{ order.cart_item.count|add:"-2" }} more{% endif %}
+                        </div>
+                        <div class="recent-order__total">NPR {{ order.get_cart_total }}</div>
+                        <span class="status-badge status-badge--{{ order.status|slugify }}">{{ order.status }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <a href="{% url 'export_orders_csv' %}" class="text-success small fw-semibold"><i class="fas fa-file-csv" aria-hidden="true"></i> Export CSV</a>
+                    <a href="{% url 'all_orders' %}" class="section-link">Manage orders <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                 </div>
                 {% else %}
-                <div class="text-center py-3">
-                    <i class="fas fa-inbox" style="font-size: 2rem; color: #ddd;"></i>
-                    <p class="text-muted small mt-2 mb-0">No orders yet.</p>
+                <div class="empty-state py-4">
+                    <span class="empty-icon"><i class="fas fa-inbox" aria-hidden="true"></i></span>
+                    <p>No orders have been placed yet.</p>
                 </div>
                 {% endif %}
-            </div>
+            </section>
         </div>
     </div>
-</div>
+</section>
+{% endblock %}
 
+{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
-(function() {
-    var statusCtx = document.getElementById('statusChart');
-    if (statusCtx) {
-        var statusLabels = [], statusData = [], statusColors = [];
+(function () {
+    var brand = '#935405';
+    var ink = '#2f7a57';
+
+    var statusCanvas = document.getElementById('statusChart');
+    if (statusCanvas) {
+        var labels = [];
+        var data = [];
+        var colors = [];
         var colorMap = {
-            'Pending': '#6c757d', 'Accepted': '#0dcaf0', 'Packed': '#ffc107',
-            'On the way': '#0d6efd', 'Delivered': '#2d6a4f', 'Cancel': '#dc3545'
+            'Pending': '#a8a29e',
+            'Accepted': '#2f6f9f',
+            'Packed': '#b7791f',
+            'On the way': '#935405',
+            'Delivered': '#2f7a57',
+            'Cancel': '#b42318'
         };
         {% for s in status_counts %}
-        statusLabels.push('{{ s.status }}');
-        statusData.push({{ s.count }});
-        statusColors.push(colorMap['{{ s.status }}'] || '#6c757d');
+        labels.push('{{ s.status }}');
+        data.push({{ s.count }});
+        colors.push(colorMap['{{ s.status }}'] || '#a8a29e');
         {% endfor %}
-        new Chart(statusCtx, {
+        new Chart(statusCanvas, {
             type: 'doughnut',
             data: {
-                labels: statusLabels,
+                labels: labels,
                 datasets: [{
-                    data: statusData,
-                    backgroundColor: statusColors,
-                    borderWidth: 0,
+                    data: data,
+                    backgroundColor: colors,
+                    borderWidth: 3,
+                    borderColor: '#fff'
                 }]
             },
             options: {
                 responsive: true,
+                cutout: '62%',
                 plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 11 } } }
+                    legend: { position: 'bottom', labels: { boxWidth: 9, boxHeight: 9, padding: 14, font: { size: 11 } } }
                 }
             }
         });
     }
 
-    var ordersCtx = document.getElementById('ordersChart');
-    if (ordersCtx) {
-        new Chart(ordersCtx, {
+    var ordersCanvas = document.getElementById('ordersChart');
+    if (ordersCanvas) {
+        new Chart(ordersCanvas, {
             type: 'bar',
             data: {
                 labels: [{% for l in daily_labels %}'{{ l }}',{% endfor %}],
@@ -183,23 +172,23 @@
                     {
                         label: 'Orders',
                         data: [{% for c in daily_counts %}{{ c }},{% endfor %}],
-                        backgroundColor: 'rgba(232,93,4,0.7)',
-                        borderRadius: 6,
-                        order: 2,
+                        backgroundColor: 'rgba(147, 84, 5, 0.72)',
+                        borderRadius: 5,
+                        order: 2
                     },
                     {
                         label: 'Revenue (NPR)',
                         data: [{% for r in daily_revenues %}{{ r }},{% endfor %}],
                         type: 'line',
-                        borderColor: '#2d6a4f',
-                        backgroundColor: 'rgba(45,106,79,0.1)',
+                        borderColor: ink,
+                        backgroundColor: 'rgba(47, 122, 87, 0.08)',
                         fill: true,
-                        tension: 0.3,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#2d6a4f',
+                        tension: 0.35,
+                        pointRadius: 3,
+                        pointBackgroundColor: ink,
                         borderWidth: 2,
                         order: 1,
-                        yAxisID: 'y1',
+                        yAxisID: 'y1'
                     }
                 ]
             },
@@ -207,22 +196,16 @@
                 responsive: true,
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
-                    legend: { position: 'top', labels: { boxWidth: 12, padding: 12, font: { size: 11 } } }
+                    legend: { position: 'top', align: 'end', labels: { boxWidth: 9, boxHeight: 9, padding: 12, font: { size: 10 } } }
                 },
                 scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, grid: { display: false } },
-                    y1: {
-                        beginAtZero: true,
-                        position: 'right',
-                        ticks: { font: { size: 10 }, callback: function(v) { return 'NPR ' + v; } },
-                        grid: { display: false },
-                    },
-                    x: { grid: { display: false } }
+                    y: { beginAtZero: true, suggestedMax: 1, ticks: { stepSize: 1, precision: 0, font: { size: 10 } }, grid: { color: 'rgba(28,25,23,0.06)' } },
+                    y1: { beginAtZero: true, position: 'right', ticks: { precision: 0, font: { size: 10 }, callback: function (value) { return 'NPR ' + value; } }, grid: { display: false } },
+                    x: { grid: { display: false }, ticks: { font: { size: 10 } } }
                 }
             }
         });
     }
 })();
 </script>
-
 {% endblock %}

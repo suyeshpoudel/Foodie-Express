@@ -1,27 +1,20 @@
 {% extends 'base.html' %}
 
-{% block start %}
+{% block title %}Payment Successful - Foodie Express{% endblock %}
 
-<div class="container">
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-6 text-center">
-            <div class="card-food p-5">
-                <div style="font-size: 5rem; color: #2d6a4f;">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <h2 class="fw-bold mt-4" style="color: var(--secondary);">Payment Successful!</h2>
-                <p class="text-muted mb-4">Thank you for your order. Your food is being prepared and will be delivered soon.</p>
-                <div class="d-flex justify-content-center gap-3">
-                    <a href="/orders/" class="btn btn-primary-custom">
-                        <i class="fas fa-receipt me-2"></i> View Orders
-                    </a>
-                    <a href="/all-items/" class="btn btn-outline-dark">
-                        <i class="fas fa-utensils me-2"></i> Order More
-                    </a>
-                </div>
+{% block start %}
+<section class="state-page section">
+    <div class="container">
+        <div class="state-card">
+            <span class="state-card__icon"><i class="fas fa-check" aria-hidden="true"></i></span>
+            <div class="state-code">Payment confirmed</div>
+            <h1>Your order is in the kitchen.</h1>
+            <p>Thank you for your order. We are preparing your food now, and you can follow each status update from your orders page.</p>
+            <div class="state-actions">
+                <a href="{% url 'orders' %}" class="btn btn-brand"><i class="fas fa-receipt" aria-hidden="true"></i> Track your order</a>
+                <a href="/all-items/" class="btn btn-outline"><i class="fas fa-utensils" aria-hidden="true"></i> Order more</a>
             </div>
         </div>
     </div>
-</div>
-
+</section>
 {% endblock %}

@@ -1,75 +1,69 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Account - Foodie Express{% endblock %}
 
 {% block start %}
-
-<div class="page-header">
+<section class="auth-wrap">
     <div class="container">
-        <h1><i class="fas fa-user-plus me-2"></i>Create Account</h1>
-        <p>Join Foodie Express and start ordering delicious food</p>
-    </div>
-</div>
-
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card-form">
-                <div class="card-header text-center">
-                    <i class="fas fa-user-plus fa-3x mb-2" style="opacity: 0.8;"></i>
-                    <h3>Register</h3>
+        <div class="auth-shell">
+            <aside class="auth-aside">
+                <a class="auth-aside__brand" href="/">
+                    <img src="{% static 'rm.png' %}" alt="" width="42" height="42">
+                    <span>
+                        <strong>Foodie Express</strong>
+                        <span>Food, delivered</span>
+                    </span>
+                </a>
+                <div class="auth-aside__copy">
+                    <h2>Your next favorite meal starts here.</h2>
+                    <p>Create an account to order faster, save the dishes you love, and keep track of every delivery.</p>
                 </div>
-                <div class="card-body">
-                    {% if messages %}
-                    {% for message in messages %}
-                    <div class="alert alert-custom alert-info d-flex align-items-center">
-                        <i class="fas fa-info-circle me-2"></i>
-                        {{ message }}
+                <ul class="auth-aside__points">
+                    <li><i class="fas fa-check" aria-hidden="true"></i> Save favorites for later</li>
+                    <li><i class="fas fa-check" aria-hidden="true"></i> Keep your delivery addresses handy</li>
+                    <li><i class="fas fa-check" aria-hidden="true"></i> Revisit your order history</li>
+                </ul>
+            </aside>
+            <div class="auth-main">
+                <div class="auth-card">
+                    <div class="auth-card__head">
+                        <h1>Create your account</h1>
+                        <p>Join Foodie Express and start ordering in minutes.</p>
                     </div>
-                    {% endfor %}
-                    {% endif %}
-
-                    <form method="post">
+                    <form method="post" class="auth-form">
                         {% csrf_token %}
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="first_name" class="form-label-custom">First Name</label>
-                                <div class="input-group">
-                                    <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-user text-muted"></i></span>
-                                    <input type="text" class="form-control form-control-custom" name="first_name" id="first_name" placeholder="John" required style="border-left: none;">
-                                </div>
+                            <div class="col-sm-6">
+                                <label for="first_name" class="form-label">First name</label>
+                                <input type="text" class="form-control" name="first_name" id="first_name" placeholder="First name" autocomplete="given-name" required autofocus>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="last_name" class="form-label-custom">Last Name</label>
-                                <div class="input-group">
-                                    <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-user text-muted"></i></span>
-                                    <input type="text" class="form-control form-control-custom" name="last_name" id="last_name" placeholder="Doe" required style="border-left: none;">
-                                </div>
+                            <div class="col-sm-6">
+                                <label for="last_name" class="form-label">Last name</label>
+                                <input type="text" class="form-control" name="last_name" id="last_name" placeholder="Last name" autocomplete="family-name" required>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="username" class="form-label-custom">Username</label>
-                            <div class="input-group">
-                                <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-user-circle text-muted"></i></span>
-                                <input type="text" class="form-control form-control-custom" name="username" id="username" placeholder="Choose a username" required style="border-left: none;">
-                            </div>
+                        <div>
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" name="username" id="username" placeholder="Choose a username" autocomplete="username" required>
                         </div>
-                        <div class="mb-4">
-                            <label for="password" class="form-label-custom">Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text" style="background: #fff; border: 1.5px solid #e6ddc5; border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);"><i class="fas fa-lock text-muted"></i></span>
-                                <input type="password" class="form-control form-control-custom" name="password" id="password" placeholder="Create a strong password" required style="border-left: none;">
+                        <div>
+                            <label for="password" class="form-label">Password</label>
+                            <div class="password-wrap">
+                                <input type="password" class="form-control" name="password" id="password" placeholder="Choose a password" autocomplete="new-password" required>
+                                <button type="button" class="password-toggle" data-password-toggle="password" aria-label="Show password">Show</button>
                             </div>
+                            <div class="field-hint">Use a password you will remember. You can change it from your profile later.</div>
                         </div>
-                        <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-3">
-                            <i class="fas fa-user-plus me-2"></i> Create Account
+                        <button type="submit" class="btn btn-brand btn-lg w-100">
+                            <i class="fas fa-user-plus" aria-hidden="true"></i> Create account
                         </button>
-                        <p class="text-center text-muted mb-0">
-                            Already have an account? <a href="/login/" class="text-decoration-none fw-semibold" style="color: var(--primary);">Login</a>
-                        </p>
                     </form>
+                    <p class="auth-switch">Already have an account? <a href="/login/">Sign in</a></p>
+                    <p class="auth-terms">Order your favorites, track deliveries, and manage your addresses in one place.</p>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
+</section>
 {% endblock %}
