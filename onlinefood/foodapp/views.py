@@ -101,8 +101,9 @@ def register(request):
         )
         user.set_password(password)
         user.save()
-        messages.success(request, "Account created successfully. Please sign in.")
-        return redirect('/login/')
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        messages.success(request, f"Welcome to Foodie Express, {first_name}!")
+        return redirect('/')
 
     return render(request, "register.html")
     
