@@ -68,7 +68,7 @@
             <article class="food-card">
                 <div class="food-media media-frame">
                     <span class="media-fallback"><i class="fas fa-utensils" aria-hidden="true"></i></span>
-                    <img src="{{ item.image.url }}" alt="{{ item.item_name }}" data-fallback loading="lazy">
+                    <img src="{{ item.image_url }}" alt="{{ item.item_name }}" data-fallback loading="lazy">
                     <span class="badge-category">{{ item.category|default:"Menu" }}</span>
                     {% if request.user.is_authenticated %}
                     {% include '_favourite_button.html' %}

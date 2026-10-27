@@ -1642,19 +1642,20 @@ textarea.form-control {
 }
 
 .category-card__name {
-    overflow: hidden;
+    overflow-wrap: anywhere;
     padding: 0 2px;
     color: var(--ink-800);
     font-family: var(--font-display);
     font-size: 0.77rem;
     font-weight: 700;
     letter-spacing: -0.01em;
-    line-height: 1.2;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 1.25;
+    text-align: center;
+    text-wrap: balance;
 }
 
 .category-card__count {
+    margin-top: auto;
     color: var(--ink-500);
     font-size: 0.63rem;
     font-weight: 500;

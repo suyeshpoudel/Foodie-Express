@@ -190,7 +190,7 @@ def _find_image(query):
     for rank, page in enumerate(_commons_candidates(query)):
         info = (page.get('imageinfo') or [{}])[0]
         mime = info.get('mime', '')
-        if mime not in ('image/jpeg', 'image/png'):
+        if mime not in ('image/jpeg', 'image/png', 'image/webp'):
             continue
         if info.get('width', 0) < 300 or info.get('height', 0) < 300:
             continue
@@ -235,7 +235,7 @@ def _download_image(url):
             url,
             headers={
                 'User-Agent': USER_AGENT,
-                'Accept': 'image/jpeg,image/png,image/*',
+                'Accept': 'image/jpeg,image/png,image/webp,image/*',
             },
         )
         try:
@@ -246,7 +246,7 @@ def _download_image(url):
                 raw = response.read(MAX_IMAGE_BYTES + 1)
             if len(raw) > MAX_IMAGE_BYTES:
                 raise ValueError('image exceeds size limit')
-            return _to_jpeg(raw)
+            return _to_webp(raw)
         except urllib.error.HTTPError as exc:
             last_error = exc
             if exc.code not in (429, 500, 502, 503, 504):
@@ -258,7 +258,7 @@ def _download_image(url):
     raise last_error
 
 
-def _to_jpeg(raw):
+def _to_webp(raw):
     try:
         with Image.open(BytesIO(raw)) as probe:
             probe.verify()
@@ -272,14 +272,14 @@ def _to_jpeg(raw):
                 image = image.convert('RGB')
             image = ImageOps.fit(image, (IMAGE_SIZE, IMAGE_SIZE), method=Image.LANCZOS)
             output = BytesIO()
-            image.save(output, format='JPEG', quality=85, optimize=True)
+            image.save(output, format='WEBP', quality=82)
     except (UnidentifiedImageError, OSError) as exc:
         raise ValueError(f'invalid image: {exc}') from exc
     return ContentFile(output.getvalue())
 
 
 def _save_image(item, content):
-    filename = f'{_slug(item.item_name)}.jpg'
+    filename = f'{_slug(item.item_name)}.webp'
     storage = item.image.storage
     target = f'item/{filename}'
     if storage.exists(target):

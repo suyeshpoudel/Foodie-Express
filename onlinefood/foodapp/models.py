@@ -46,6 +46,20 @@ class Item(BaseModel):
     def __str__(self):
         return self.item_name
 
+    @property
+    def image_url(self):
+        if not self.image:
+            return ''
+        name = self.image.name
+        if name.lower().endswith(('.jpg', '.jpeg', '.png')):
+            webp_name = f"{name.rsplit('.', 1)[0]}.webp"
+            try:
+                if self.image.storage.exists(webp_name):
+                    return self.image.storage.url(webp_name)
+            except (OSError, ValueError):
+                pass
+        return self.image.url
+
 
 STATUS_CHOICES = (
     ('Pending', 'Pending'),

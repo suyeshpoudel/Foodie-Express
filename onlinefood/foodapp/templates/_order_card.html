@@ -32,7 +32,7 @@
         <div class="order-items">
             {% for cart_item in order.cart_item.all %}
             <div class="order-item">
-                {% if cart_item.item.image %}<img src="{{ cart_item.item.image.url }}" alt="{{ cart_item.item.item_name }}">{% endif %}
+                {% if cart_item.item.image %}<img src="{{ cart_item.item.image_url }}" alt="{{ cart_item.item.item_name }}">{% endif %}
                 <div class="order-item__info">
                     <div class="order-item__name">{{ cart_item.item.item_name }}</div>
                     <div class="order-item__qty">{{ cart_item.quantity }}x @ NPR {{ cart_item.item.price }}</div>

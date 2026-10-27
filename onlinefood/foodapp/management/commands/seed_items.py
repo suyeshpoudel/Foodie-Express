@@ -130,7 +130,7 @@ def generate_item_image(item_name, color):
         y += (bbox[3] - bbox[1]) + 10
 
     buf = BytesIO()
-    img.save(buf, format='JPEG', quality=75)
+    img.save(buf, format='WEBP', quality=80)
     return ContentFile(buf.getvalue())
 
 
@@ -162,7 +162,7 @@ class Command(BaseCommand):
                     price=price,
                     prep_time=prep_time,
                 )
-                item.image.save(f'{safe_name}.jpg', image_file, save=True)
+                item.image.save(f'{safe_name}.webp', image_file, save=True)
                 total_created += 1
                 self.stdout.write(f"  Created '{item_name}' ({category_name}) — Rs.{price}")
 

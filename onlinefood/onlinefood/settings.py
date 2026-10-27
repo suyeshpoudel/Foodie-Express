@@ -137,6 +137,10 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.environ.get('DJANGO_MEDIA_ROOT', os.path.join(BASE_DIR, 'public/media'))
 
+# WhiteNoise serves the checked-in media files in production so item images
+# work when DEBUG is off and Django's development media handler is disabled.
+WHITENOISE_ROOT = os.path.join(BASE_DIR, 'public')
+
 # Email Configuration
 EMAIL_BACKEND = os.environ.get('DJANGO_EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')

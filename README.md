@@ -36,7 +36,7 @@ Both commands are safe to re-run. Existing categories/items are skipped, and ima
 - `--dry-run` shows the selected source image without downloading.
 - `--delay 1.0` sets the wait between API lookups (default: `1.0`).
 
-The command retries transient failures, validates each download with Pillow, and saves a 512x512 JPEG under `MEDIA_ROOT/item/`.
+The command retries transient failures, validates each download with Pillow, and saves a 512x512 WebP under `MEDIA_ROOT/item/`.
 
 # Deployment Notes
 `build.sh` runs `migrate` and `seed_items` automatically. To refresh images on a deployed database, run the command where the application files live (for example, the Render Shell):
@@ -59,4 +59,4 @@ Image files are written to `MEDIA_ROOT`, not to the database. Two deployment opt
 
    `public/media/` is gitignored, so `-f` is required. Filenames are deterministic, so this stays at one image per item.
 
-If `DJANGO_DEBUG=False`, also configure media file serving, because WhiteNoise only serves collected static files.
+`WHITENOISE_ROOT` points at `public/`, so checked-in files under `public/media/` are served in production after deployment. Uploaded media still needs durable external storage.

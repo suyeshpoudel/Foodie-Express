@@ -4,15 +4,19 @@ import base64
 import csv
 import uuid
 from datetime import datetime
+from io import BytesIO
+from pathlib import Path
 
 from django.contrib import messages
 import random
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, render
 from django.http import HttpResponse, JsonResponse
+from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from datetime import timedelta
+from PIL import Image, UnidentifiedImageError
 
 from .models import Cart, CartItems, Item, ItemCategory, OrderPlaced, DeliveryAddress, Profile, ItemReview, FavouriteItem, DeliveryZone, Coupon, STATUS_CHOICES
 from django.contrib.auth import authenticate, login, logout
@@ -317,6 +321,23 @@ def order_card(request, order_uid):
 
     return render(request, '_order_card.html', {'order': order, 'status_flow': status_flow})
 
+def _to_webp_upload(upload):
+    if not upload:
+        return upload
+    try:
+        with Image.open(upload) as image:
+            image.load()
+            has_alpha = image.mode in ('RGBA', 'LA') or (
+                image.mode == 'P' and 'transparency' in image.info
+            )
+            image = image.convert('RGBA' if has_alpha else 'RGB')
+            output = BytesIO()
+            image.save(output, format='WEBP', quality=82, method=6)
+    except (UnidentifiedImageError, OSError):
+        return upload
+    return ContentFile(output.getvalue(), name=f'{Path(upload.name).stem}.webp')
+
+
 @login_required(login_url= "/login/")
 def add_item(request):
     categories = ItemCategory.objects.all()
@@ -327,7 +348,7 @@ def add_item(request):
         description = data.get("description")
         category_uid = data.get("category")
         price = data.get("price")
-        image = request.FILES.get("image")
+        image = _to_webp_upload(request.FILES.get("image"))
         prep_time = data.get("prep_time", 15)
 
         category = ItemCategory.objects.filter(uid=category_uid).first()
@@ -430,7 +451,7 @@ def update_item(request, item_uid):
         description = data.get("description")
         category_uid = data.get("category")
         price = data.get("price")
-        image = request.FILES.get("image")
+        image = _to_webp_upload(request.FILES.get("image"))
         prep_time = data.get("prep_time", 15)
 
         category = ItemCategory.objects.filter(uid=category_uid).first()
